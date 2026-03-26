@@ -1,9 +1,10 @@
+import React from 'react'
 import cx from 'classnames'
 import { Justify, justifyMap } from '../types'
 
 type Sizes = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
 
-type Props = JSX.IntrinsicElements['div'] & {
+type Props = React.JSX.IntrinsicElements['div'] & {
     spacing?: Sizes
     justify?: Justify
 }

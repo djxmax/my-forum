@@ -1,9 +1,10 @@
+import React from 'react'
 import { ExclamationCircleIcon } from '@heroicons/react/20/solid'
 import cx from 'classnames'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
-type Props = JSX.IntrinsicElements['input'] & {
+type Props = React.JSX.IntrinsicElements['input'] & {
     label?: string
     infoLabel?: string
     errorLabel?: string

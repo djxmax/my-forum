@@ -1,8 +1,9 @@
+import React from 'react'
 import cx from 'classnames'
 
 type Sizes = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
-type Props = JSX.IntrinsicElements['button'] & {
+type Props = React.JSX.IntrinsicElements['button'] & {
     size?: Sizes
 }
 

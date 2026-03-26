@@ -1,7 +1,8 @@
+import React from 'react'
 import cx from 'classnames'
 import { Stack } from '../Stack'
 
-type Props = JSX.IntrinsicElements['div']
+type Props = React.JSX.IntrinsicElements['div']
 
 export function Card({ children, className, ...rest }: Props) {
     return (

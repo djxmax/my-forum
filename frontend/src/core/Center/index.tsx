@@ -1,6 +1,7 @@
+import React from 'react'
 import cx from 'classnames'
 
-type Props = JSX.IntrinsicElements['div'] & {
+type Props = React.JSX.IntrinsicElements['div'] & {
     inline?: boolean
 }
 

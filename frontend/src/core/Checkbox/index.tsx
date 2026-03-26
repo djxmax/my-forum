@@ -1,8 +1,9 @@
+import React from 'react'
 import cx from 'classnames'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
-type Props = JSX.IntrinsicElements['input'] & {
+type Props = React.JSX.IntrinsicElements['input'] & {
     label?: string
     labelLeft?: boolean
 }

@@ -1,8 +1,9 @@
+import React from 'react'
 import cx from 'classnames'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
-type Props = JSX.IntrinsicElements['select'] & {
+type Props = React.JSX.IntrinsicElements['select'] & {
     label?: string
     infoLabel?: string
     errorLabel?: string
