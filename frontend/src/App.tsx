@@ -18,11 +18,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default function App() {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-
   return (
     <div>
-      {isAuthenticated && <Navbar />}
+      <Navbar />
       <div className="max-w-3xl mx-auto px-4 py-8">
         <Routes>
           <Route
@@ -41,14 +39,7 @@ export default function App() {
               </GuestRoute>
             }
           />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Posts />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/" element={<Posts />} />
           <Route
             path="/posts/new"
             element={
@@ -57,22 +48,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <div>Home (à venir)</div>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/posts/:id"
-            element={
-              <ProtectedRoute>
-                <PostDetail />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/posts/:id" element={<PostDetail />} />
         </Routes>
       </div>
     </div>
