@@ -3,13 +3,12 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../lib/api";
 import { useAuthStore } from "../store/authStore";
-import { Card } from "../core/Card";
 import { Stack } from "../core/Stack";
 import { Text } from "../core/Text";
-import { Button } from "../core/Button";
 import { Post, Comment } from "../entities";
 import { PostCard } from "../components/PostCard";
 import { CommentCard } from "../components/CommentCard";
+import { CommentForm } from "../components/CommentForm";
 
 export default function PostDetail() {
   const { id } = useParams<{ id: string }>();
@@ -73,48 +72,37 @@ export default function PostDetail() {
         }
       />
 
-      {/* Commentaires */}
-      <Text variant="subtitle">
-        Commentaires ({commentsLoading ? "..." : (comments?.length ?? 0)})
-      </Text>
+      <Stack spacing={2}>
+        {/* Commentaires */}
+        <Text variant="subtitle">
+          Commentaires ({commentsLoading ? "..." : (comments?.length ?? 0)})
+        </Text>
+        {/* Liste des commentaires */}
+        {comments?.length === 0 && (
+          <Text variant="paragraph">Aucun commentaire pour le moment.</Text>
+        )}
+        {comments?.map((c) => (
+          <CommentCard
+            key={c.id}
+            comment={c}
+            onDelete={
+              user?.id === c.author.id
+                ? () => deleteComment.mutate(c.id)
+                : undefined
+            }
+          />
+        ))}
 
-      {/* Formulaire de commentaire */}
-      {isAuthenticated && (
-        <Card>
-          <Stack spacing={3}>
-            <textarea
-              rows={3}
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Écrire un commentaire..."
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-            <Button
-              onClick={() => createComment.mutate()}
-              disabled={createComment.isPending || !comment}
-              size="sm"
-            >
-              {createComment.isPending ? "Envoi..." : "Commenter"}
-            </Button>
-          </Stack>
-        </Card>
-      )}
-
-      {/* Liste des commentaires */}
-      {comments?.length === 0 && (
-        <Text variant="paragraph">Aucun commentaire pour le moment.</Text>
-      )}
-      {comments?.map((c) => (
-        <CommentCard
-          key={c.id}
-          comment={c}
-          onDelete={
-            user?.id === c.author.id
-              ? () => deleteComment.mutate(c.id)
-              : undefined
-          }
-        />
-      ))}
+        {/* Formulaire de commentaire */}
+        {isAuthenticated && (
+          <CommentForm
+            value={comment}
+            onChange={setComment}
+            onSubmit={() => createComment.mutate()}
+            isPending={createComment.isPending}
+          />
+        )}
+      </Stack>
     </Stack>
   );
 }
