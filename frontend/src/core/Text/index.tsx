@@ -20,10 +20,10 @@ function getTag(variant: Variant) {
 }
 
 const styles: Record<Variant, string> = {
-    title: 'text-3xl font-bold leading-tight tracking-tight text-gray-900',
-    subtitle: 'text-lg font-semibold leading-6 text-gray-900',
-    paragraph: 'text-base leading-7 text-gray-700',
-    label: 'text-sm font-medium leading-6 text-gray-900',
+    title: 'text-3xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white',
+    subtitle: 'text-lg font-semibold leading-6 text-gray-900 dark:text-white',
+    paragraph: 'text-base leading-7 text-gray-700 dark:text-gray-300',
+    label: 'text-sm font-medium leading-6 text-gray-900 dark:text-gray-200',
 }
 
 export function Text({ variant = 'paragraph', children, className }: Props) {

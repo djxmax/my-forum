@@ -18,7 +18,7 @@ export function CommentForm({ value, onChange, onSubmit, isPending }: Props) {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Écrire un commentaire..."
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder:text-gray-400"
         />
         <Button onClick={onSubmit} disabled={isPending || !value} size="sm">
           {isPending ? "Envoi..." : "Commenter"}

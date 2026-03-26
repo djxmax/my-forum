@@ -49,7 +49,7 @@ export function PostCard({ post, onDelete, onClick, compact }: Props) {
             >
               {post.text}
             </Text>
-            <div className="flex items-center gap-2 text-xs text-gray-500">
+            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
               <span>Par {post.author.username}</span>
               <span>•</span>
               <span>{new Date(post.createdAt).toLocaleString()}</span>

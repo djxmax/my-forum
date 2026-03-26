@@ -28,7 +28,7 @@ export function CommentCard({ comment, onDelete }: Props) {
               </button>
             )}
           </div>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
             Par {comment.author.username} •{" "}
             {new Date(comment.createdAt).toLocaleString()}
           </div>

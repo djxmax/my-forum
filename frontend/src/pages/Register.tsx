@@ -33,7 +33,7 @@ export default function Register() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     if (form.password !== form.confirmPassword) {
