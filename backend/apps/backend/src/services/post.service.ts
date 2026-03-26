@@ -27,7 +27,7 @@ export class PostService {
     async create(dto: CreatePostDto, user: UserDocument) {
         return this.postModel.create({
             title: dto.title,
-            content: dto.content,
+            text: dto.text,
             author: user._id,
         })
     }

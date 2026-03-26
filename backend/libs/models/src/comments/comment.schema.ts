@@ -5,10 +5,18 @@ import { Post } from '../posts/post.schema'
 
 export type CommentDocument = Comment & Document
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true,
+    toJSON: {
+    virtuals: true,
+    transform: (_, ret: Record<string, unknown>) => {
+      ret.id = ret._id
+      delete ret._id
+      delete ret.__v
+    },
+  }, })
 export class Comment {
     @Prop({ required: true })
-    content: string
+    text: string
 
     @Prop({ type: Types.ObjectId, ref: 'User', required: true })
     author: User

@@ -1,9 +1,9 @@
 export class CreatePostDto {
     title: string
-    content: string
+    text: string
 }
 
 export class UpdatePostDto {
     title?: string
-    content?: string
+    text?: string
 }

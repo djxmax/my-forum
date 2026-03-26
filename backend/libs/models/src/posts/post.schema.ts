@@ -4,13 +4,21 @@ import { User } from '../users/user.schema'
 
 export type PostDocument = Post & Document
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true,
+    toJSON: {
+    virtuals: true,
+    transform: (_, ret: Record<string, unknown>) => {
+      ret.id = ret._id
+      delete ret._id
+      delete ret.__v
+    },
+  }, })
 export class Post {
     @Prop({ required: true, trim: true })
     title: string
 
     @Prop({ required: true })
-    content: string
+    text: string
 
     @Prop({ type: Types.ObjectId, ref: 'User', required: true })
     author: User

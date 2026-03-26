@@ -19,7 +19,7 @@ export class CommentService {
         if (!post) throw new NotFoundException('Post not found')
 
         const comment = await this.commentModel.create({
-            content: dto.content,
+            text: dto.text,
             author: user._id,
             post: dto.postId,
         })
