@@ -1,0 +1,95 @@
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "../lib/api";
+import { Card } from "../core/Card";
+import { Stack } from "../core/Stack";
+import { Text } from "../core/Text";
+import { Button } from "../core/Button";
+import { Input } from "../core/Input";
+
+export default function CreatePost() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState({ title: "", text: "" });
+  const [error, setError] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: () => api.post("/posts", form),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      navigate("/");
+    },
+    onError: (err: any) => {
+      setError(err.response?.data?.message ?? "Une erreur est survenue");
+    },
+  });
+
+  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+    mutation.mutate();
+  };
+
+  return (
+    <Stack spacing={6}>
+      <Link to="/" className="text-primary-600 hover:underline text-sm">
+        ← Retour aux posts
+      </Link>
+
+      <Card>
+        <Stack spacing={4}>
+          <Text variant="title">Nouveau post</Text>
+
+          {error && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <Stack spacing={4}>
+              <Input
+                id="title"
+                label="Titre"
+                required
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="Titre du post"
+              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Contenu
+                </label>
+                <textarea
+                  rows={6}
+                  required
+                  value={form.text}
+                  onChange={(e) =>
+                    setForm({ ...form, text: e.target.value })
+                  }
+                  placeholder="Contenu du post..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  type="submit"
+                  disabled={mutation.isPending || !form.title || !form.text}
+                >
+                  {mutation.isPending ? "Publication..." : "Publier"}
+                </Button>
+                <Button
+                  onClick={() => navigate("/")}
+                  className="bg-gray-200 text-gray-700 hover:bg-gray-300"
+                >
+                  Annuler
+                </Button>
+              </div>
+            </Stack>
+          </form>
+        </Stack>
+      </Card>
+    </Stack>
+  );
+}

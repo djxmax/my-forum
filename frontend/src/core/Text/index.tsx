@@ -26,7 +26,7 @@ const styles: Record<Variant, string> = {
     label: 'text-sm font-medium leading-6 text-gray-900',
 }
 
-export function Text({ variant = 'paragraph', children }: Props) {
+export function Text({ variant = 'paragraph', children, className }: Props) {
     const As = getTag(variant)
-    return <As className={styles[variant]}>{children}</As>
+    return <As className={[styles[variant], className].filter(Boolean).join(' ')}>{children}</As>
 }
