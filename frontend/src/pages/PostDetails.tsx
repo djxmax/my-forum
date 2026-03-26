@@ -15,7 +15,6 @@ export default function PostDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
-  console.log("user", user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [comment, setComment] = useState("");
 
