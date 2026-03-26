@@ -7,9 +7,11 @@ import { AuthController } from './auth.controller'
 import { User, UserSchema } from '@app/models/users/user.schema'
 import { JwtStrategy } from './jwt/jwt.strategy'
 import { JwtAuthGuard } from './jwt/jwt-auth.guard'
+import { ConfigModule } from '@nestjs/config'
 
 @Module({
     imports: [
+        ConfigModule.forRoot({ isGlobal: true }),
         MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
         PassportModule,
         JwtModule.register({
@@ -18,7 +20,7 @@ import { JwtAuthGuard } from './jwt/jwt-auth.guard'
         }),
     ],
     controllers: [AuthController],
-    providers: [AuthService, JwtStrategy],
+    providers: [AuthService, JwtStrategy, JwtAuthGuard],
     exports: [JwtAuthGuard],
 })
 export class AuthModule {}
