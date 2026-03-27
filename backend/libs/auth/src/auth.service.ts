@@ -4,7 +4,7 @@ import { Model } from 'mongoose'
 import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
 import { User, UserDocument } from '@app/models/users/user.schema'
-import { LoginDto, RegisterDto } from './dto/auth.dto'
+import { ChangePasswordDto, LoginDto, RegisterDto } from './dto/auth.dto'
 
 @Injectable()
 export class AuthService {
@@ -36,6 +36,16 @@ export class AuthService {
         if (!isMatch) throw new UnauthorizedException('Invalid credentials')
 
         return this.signToken(user)
+    }
+
+    async changePassword(user: UserDocument, dto: ChangePasswordDto) {
+        const isMatch = await bcrypt.compare(dto.currentPassword, user.password)
+        if (!isMatch) throw new UnauthorizedException('Current password is incorrect')
+
+        const hashed = await bcrypt.hash(dto.newPassword, 10)
+        await this.userModel.findByIdAndUpdate(user._id, { password: hashed })
+
+        return { message: 'Password updated successfully' }
     }
 
     private signToken(user: UserDocument) {

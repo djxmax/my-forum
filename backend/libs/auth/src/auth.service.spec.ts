@@ -21,6 +21,7 @@ describe('AuthService', () => {
     const mockUserModel = {
         findOne: jest.fn(),
         create: jest.fn(),
+        findByIdAndUpdate: jest.fn().mockResolvedValue({}),
     }
 
     const mockJwtService = {
@@ -66,6 +67,36 @@ describe('AuthService', () => {
             ).rejects.toThrow(ConflictException)
 
             expect(mockUserModel.create).not.toHaveBeenCalled()
+        })
+    })
+
+    describe('changePassword', () => {
+        it('should update the password successfully', async () => {
+            ;(bcrypt.compare as jest.Mock).mockResolvedValue(true)
+            ;(bcrypt.hash as jest.Mock).mockResolvedValue('newHashedPassword')
+
+            const result = await service.changePassword(mockUser as any, {
+                currentPassword: 'password123',
+                newPassword: 'newPassword456',
+            })
+
+            expect(bcrypt.compare).toHaveBeenCalledWith('password123', mockUser.password)
+            expect(bcrypt.hash).toHaveBeenCalledWith('newPassword456', 10)
+            expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalledWith(mockUser._id, { password: 'newHashedPassword' })
+            expect(result).toEqual({ message: 'Password updated successfully' })
+        })
+
+        it('should throw UnauthorizedException if current password is incorrect', async () => {
+            ;(bcrypt.compare as jest.Mock).mockResolvedValue(false)
+
+            await expect(
+                service.changePassword(mockUser as any, {
+                    currentPassword: 'wrongPassword',
+                    newPassword: 'newPassword456',
+                })
+            ).rejects.toThrow(UnauthorizedException)
+
+            expect(mockUserModel.findByIdAndUpdate).not.toHaveBeenCalled()
         })
     })
 
