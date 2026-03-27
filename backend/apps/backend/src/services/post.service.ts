@@ -8,7 +8,10 @@ import { CreatePostDto } from '../dto/post.dto'
 
 @Injectable()
 export class PostService {
-    constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>, @InjectModel(Comment.name) private commentModel: Model<CommentDocument>) {}
+    constructor(
+        @InjectModel(Post.name) private postModel: Model<PostDocument>,
+        @InjectModel(Comment.name) private commentModel: Model<CommentDocument>
+    ) {}
 
     async findAll() {
         return this.postModel
@@ -30,6 +33,17 @@ export class PostService {
             text: dto.text,
             author: user._id,
         })
+    }
+
+    async toggleLike(id: string, user: UserDocument) {
+        const post = await this.postModel.findById(id)
+        if (!post) throw new NotFoundException('Post not found')
+
+        const hasLiked = post.likes.some((uid) => uid.toString() === user._id.toString())
+
+        await this.postModel.findByIdAndUpdate(id, hasLiked ? { $pull: { likes: user._id } } : { $addToSet: { likes: user._id } })
+
+        return { liked: !hasLiked }
     }
 
     async delete(id: string, user: UserDocument) {

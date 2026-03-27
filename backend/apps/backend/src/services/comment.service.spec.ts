@@ -23,6 +23,7 @@ describe('CommentService', () => {
     const mockCommentModel = {
         find: jest.fn(),
         findById: jest.fn(),
+        findByIdAndUpdate: jest.fn().mockResolvedValue({}),
         create: jest.fn(),
     }
 
@@ -84,6 +85,34 @@ describe('CommentService', () => {
             ).rejects.toThrow(NotFoundException)
 
             expect(mockCommentModel.create).not.toHaveBeenCalled()
+        })
+    })
+
+    describe('toggleLike', () => {
+        it('should add a like when user has not liked yet', async () => {
+            const comment = { ...mockComment, likes: [] }
+            mockCommentModel.findById.mockResolvedValue(comment)
+
+            const result = await service.toggleLike('comment-id', mockUser)
+
+            expect(mockCommentModel.findByIdAndUpdate).toHaveBeenCalledWith('comment-id', { $addToSet: { likes: mockUser._id } })
+            expect(result).toEqual({ liked: true })
+        })
+
+        it('should remove a like when user has already liked', async () => {
+            const comment = { ...mockComment, likes: [{ toString: () => 'user-id' }] }
+            mockCommentModel.findById.mockResolvedValue(comment)
+
+            const result = await service.toggleLike('comment-id', mockUser)
+
+            expect(mockCommentModel.findByIdAndUpdate).toHaveBeenCalledWith('comment-id', { $pull: { likes: mockUser._id } })
+            expect(result).toEqual({ liked: false })
+        })
+
+        it('should throw NotFoundException if comment does not exist', async () => {
+            mockCommentModel.findById.mockResolvedValue(null)
+
+            await expect(service.toggleLike('nonexistent-id', mockUser)).rejects.toThrow(NotFoundException)
         })
     })
 

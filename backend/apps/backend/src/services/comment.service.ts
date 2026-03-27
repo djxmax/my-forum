@@ -8,7 +8,10 @@ import { CreateCommentDto } from '../dto/comment.dto'
 
 @Injectable()
 export class CommentService {
-    constructor(@InjectModel(Comment.name) private commentModel: Model<CommentDocument>, @InjectModel(Post.name) private postModel: Model<PostDocument>) {}
+    constructor(
+        @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
+        @InjectModel(Post.name) private postModel: Model<PostDocument>
+    ) {}
 
     async findByPost(postId: string) {
         return this.commentModel.find({ post: postId }).populate('author', 'username email').sort({ createdAt: 1 }).exec()
@@ -25,6 +28,17 @@ export class CommentService {
         })
 
         return comment.populate('author', 'username email')
+    }
+
+    async toggleLike(id: string, user: UserDocument) {
+        const comment = await this.commentModel.findById(id)
+        if (!comment) throw new NotFoundException('Comment not found')
+
+        const hasLiked = comment.likes.some((uid) => uid.toString() === user._id.toString())
+
+        await this.commentModel.findByIdAndUpdate(id, hasLiked ? { $pull: { likes: user._id } } : { $addToSet: { likes: user._id } })
+
+        return { liked: !hasLiked }
     }
 
     async delete(id: string, user: UserDocument) {
