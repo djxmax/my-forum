@@ -7,6 +7,7 @@ import Posts from "./pages/Posts";
 import CreatePost from "./pages/CreatePost";
 import PostDetail from "./pages/PostDetails";
 import Settings from "./pages/Settings";
+import Analytics from "./pages/Analytics";
 
 const GuestRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -55,6 +56,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <Analytics />
               </ProtectedRoute>
             }
           />

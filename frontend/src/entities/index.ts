@@ -32,3 +32,12 @@ export interface AuthResponse {
   access_token: string;
   user: User;
 }
+
+export interface AnalyticsData {
+  totalPosts: number;
+  totalLikes: number;
+  recentPosts: number;
+  recentLikes: number;
+  topPosters: { username: string; postCount: number }[];
+  recentLimitDays: number;
+}
