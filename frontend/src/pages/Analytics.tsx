@@ -48,7 +48,9 @@ export default function Analytics() {
           </div>
 
           <div>
-            <Text variant="subtitle">Top 5 des contributeurs</Text>
+            <Text variant="subtitle">
+              Top {data.topPosters.length} des contributeurs
+            </Text>
             <div className="mt-3">
               <PieChartCard
                 title=""
