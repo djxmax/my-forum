@@ -5,6 +5,7 @@ import { Stack } from "../core/Stack";
 import { Text } from "../core/Text";
 import { AnalyticsData } from "../entities";
 import { StatCard } from "../components/StatCard";
+import { PieChartCard } from "../components/charts/PieChartCard";
 
 export default function Analytics() {
   const { data, isLoading, isError } = useQuery<AnalyticsData>({
@@ -48,28 +49,16 @@ export default function Analytics() {
 
           <div>
             <Text variant="subtitle">Top 5 des contributeurs</Text>
-            <Card>
-              <Stack spacing={2}>
-                {data.topPosters.map((poster, i) => (
-                  <div
-                    key={poster.username}
-                    className="flex items-center justify-between py-2 border-b last:border-0 border-gray-100 dark:border-gray-700"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-bold text-gray-400 dark:text-gray-500 w-5">
-                        {i + 1}
-                      </span>
-                      <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                        {poster.username}
-                      </span>
-                    </div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {poster.postCount} post{poster.postCount > 1 ? "s" : ""}
-                    </span>
-                  </div>
-                ))}
-              </Stack>
-            </Card>
+            <div className="mt-3">
+              <PieChartCard
+                title=""
+                dataType="Nom de utilisateurs"
+                dataValueDescription="Nombre de posts"
+                data={data.topPosters.map(
+                  (p) => [p.username, p.postCount] as [string, number],
+                )}
+              ></PieChartCard>
+            </div>
           </div>
         </>
       )}
