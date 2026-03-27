@@ -1,18 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document, Types } from 'mongoose'
+import { HydratedDocument, Types } from 'mongoose'
 import { User } from '../users/user.schema'
 
-export type PostDocument = Post & Document
+export type PostDocument = HydratedDocument<Post>
 
-@Schema({ timestamps: true,
+@Schema({
+    timestamps: true,
     toJSON: {
-    virtuals: true,
-    transform: (_, ret: Record<string, unknown>) => {
-      ret.id = ret._id
-      delete ret._id
-      delete ret.__v
+        virtuals: true,
+        versionKey: false,
     },
-  }, })
+})
 export class Post {
     @Prop({ required: true, trim: true })
     title: string
@@ -28,3 +26,5 @@ export class Post {
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post)
+
+PostSchema.index({ createdAt: -1 })

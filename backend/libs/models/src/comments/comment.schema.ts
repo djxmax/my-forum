@@ -1,24 +1,22 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document, Types } from 'mongoose'
+import mongoose, { Document, HydratedDocument, Types } from 'mongoose'
 import { User } from '../users/user.schema'
 import { Post } from '../posts/post.schema'
 
-export type CommentDocument = Comment & Document
+export type CommentDocument = HydratedDocument<Comment>
 
-@Schema({ timestamps: true,
+@Schema({
+    timestamps: true,
     toJSON: {
-    virtuals: true,
-    transform: (_, ret: Record<string, unknown>) => {
-      ret.id = ret._id
-      delete ret._id
-      delete ret.__v
+        virtuals: true,
+        versionKey: false,
     },
-  }, })
+})
 export class Comment {
     @Prop({ required: true })
     text: string
 
-    @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, required: true })
     author: User
 
     @Prop({ type: Types.ObjectId, ref: 'Post', required: true })
@@ -29,3 +27,5 @@ export class Comment {
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment)
+
+CommentSchema.index({ createdAt: -1 })

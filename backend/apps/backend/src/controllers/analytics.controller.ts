@@ -1,6 +1,8 @@
-import { Controller, Get, UseGuards, Req } from '@nestjs/common'
+import { Controller, Get, UseGuards } from '@nestjs/common'
 import { AnalyticsService } from '../services/analytics.service'
 import { JwtAuthGuard } from '@app/auth/jwt/jwt-auth.guard'
+import { CurrentUser } from '@app/auth'
+import { UserDocument } from '@app/models/users/user.schema'
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -9,7 +11,7 @@ export class AnalyticsController {
     // GET /analytics/me → stats de l'utilisateur connecté
     @Get('me')
     @UseGuards(JwtAuthGuard)
-    getMyStats(@Req() req) {
-        return this.analyticsService.getMyStats(req.user)
+    getMyStats(@CurrentUser() user: UserDocument) {
+        return this.analyticsService.getMyStats(user)
     }
 }

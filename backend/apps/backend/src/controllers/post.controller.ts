@@ -20,6 +20,7 @@ export class PostController {
     @Post()
     @UseGuards(JwtAuthGuard)
     create(@Body() dto: CreatePostDto, @Req() req) {
+        console.log(req.user)
         return this.postService.create(dto, req.user)
     }
 

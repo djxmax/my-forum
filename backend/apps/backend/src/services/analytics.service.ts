@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 import { Post, PostDocument } from '@app/models/posts/post.schema'
-import { UserDocument } from '@app/models/users/user.schema'
+import { User, UserDocument } from '@app/models/users/user.schema'
 import { AnalyticsResponseDto } from '../dto/analytics.dto'
 
 @Injectable()

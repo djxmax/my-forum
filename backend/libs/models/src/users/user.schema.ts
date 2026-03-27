@@ -1,18 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document } from 'mongoose'
+import { HydratedDocument } from 'mongoose'
 
-export type UserDocument = User & Document
+export type UserDocument = HydratedDocument<User>
 
-@Schema({ timestamps: true,
+@Schema({
+    timestamps: true,
     toJSON: {
-    virtuals: true,
-    transform: (_, ret: Record<string, unknown>) => {
-      ret.id = ret._id
-      delete ret._id
-      delete ret.__v
+        virtuals: true,
+        versionKey: false,
     },
-  },
- })
+})
 export class User {
     @Prop({ required: true, unique: true, trim: true })
     username: string
