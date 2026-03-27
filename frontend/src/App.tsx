@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar";
 import Posts from "./pages/Posts";
 import CreatePost from "./pages/CreatePost";
 import PostDetail from "./pages/PostDetails";
+import Settings from "./pages/Settings";
 
 const GuestRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -49,6 +50,14 @@ export default function App() {
             }
           />
           <Route path="/posts/:id" element={<PostDetail />} />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </div>
     </div>
