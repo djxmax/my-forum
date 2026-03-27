@@ -53,6 +53,18 @@ export default function PostDetail() {
     onSuccess: () => navigate("/"),
   });
 
+  // Liker un post
+  const likePost = useMutation({
+    mutationFn: () => api.patch(`/posts/${id}/like`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts", id] }),
+  });
+
+  // Liker un commentaire
+  const likeComment = useMutation({
+    mutationFn: (commentId: string) => api.patch(`/comments/${commentId}/like`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["comments", id] }),
+  });
+
   if (postLoading) return <Text variant="paragraph">Chargement...</Text>;
   if (!post) return <Text variant="paragraph">Post introuvable.</Text>;
 
@@ -66,9 +78,8 @@ export default function PostDetail() {
       {/* Post */}
       <PostCard
         post={post}
-        onDelete={
-          user?.id === post.author.id ? () => deletePost.mutate() : undefined
-        }
+        onDelete={user?.id === post.author.id ? () => deletePost.mutate() : undefined}
+        onLike={isAuthenticated ? () => likePost.mutate() : undefined}
       />
 
       <Stack spacing={2}>
@@ -84,11 +95,8 @@ export default function PostDetail() {
           <CommentCard
             key={c.id}
             comment={c}
-            onDelete={
-              user?.id === c.author.id
-                ? () => deleteComment.mutate(c.id)
-                : undefined
-            }
+            onDelete={user?.id === c.author.id ? () => deleteComment.mutate(c.id) : undefined}
+            onLike={isAuthenticated ? () => likeComment.mutate(c.id) : undefined}
           />
         ))}
 
