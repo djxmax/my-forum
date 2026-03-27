@@ -8,7 +8,10 @@ import { LoginDto, RegisterDto } from './dto/auth.dto'
 
 @Injectable()
 export class AuthService {
-    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>, private jwtService: JwtService) {}
+    constructor(
+        @InjectModel(User.name) private userModel: Model<UserDocument>,
+        private jwtService: JwtService
+    ) {}
 
     async register(dto: RegisterDto) {
         const existing = await this.userModel.findOne({ email: dto.email })
@@ -36,11 +39,11 @@ export class AuthService {
     }
 
     private signToken(user: UserDocument) {
-        const payload = { sub: user._id, email: user.email }
+        const payload = { sub: user.id, email: user.email, id: user.id, username: user.username }
         return {
             access_token: this.jwtService.sign(payload),
             user: {
-                id: user._id,
+                id: user.id,
                 username: user.username,
                 email: user.email,
             },
