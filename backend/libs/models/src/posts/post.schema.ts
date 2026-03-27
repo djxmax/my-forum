@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { HydratedDocument, Types } from 'mongoose'
+import mongoose, { HydratedDocument, Types } from 'mongoose'
 import { User } from '../users/user.schema'
 
 export type PostDocument = HydratedDocument<Post>
@@ -18,7 +18,7 @@ export class Post {
     @Prop({ required: true })
     text: string
 
-    @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User, required: true })
     author: User
 
     @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
