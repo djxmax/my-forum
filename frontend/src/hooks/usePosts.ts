@@ -17,10 +17,14 @@ export function usePost(id: string | undefined) {
   });
 }
 
-export function useCreatePost(onSuccess: () => void, onError: (err: any) => void) {
+export function useCreatePost(
+  onSuccess: () => void,
+  onError: (err: any) => void,
+) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { title: string; text: string }) => api.post("/posts", data),
+    mutationFn: (data: { title: string; text: string }) =>
+      api.post("/posts", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       onSuccess();
@@ -39,7 +43,7 @@ export function useDeletePost(id: string | undefined, onSuccess: () => void) {
 export function useLikePost(id: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => api.patch(`/posts/${id}/like`),
+    mutationFn: () => api.post("/likes", { parentId: id, parentType: "post" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts", id] }),
   });
 }

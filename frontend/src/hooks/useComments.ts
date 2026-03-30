@@ -11,7 +11,10 @@ export function useComments(postId: string | undefined) {
   });
 }
 
-export function useCreateComment(postId: string | undefined, onSuccess: () => void) {
+export function useCreateComment(
+  postId: string | undefined,
+  onSuccess: () => void,
+) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (text: string) => api.post("/comments", { text, postId }),
@@ -34,7 +37,8 @@ export function useDeleteComment(postId: string | undefined) {
 export function useLikeComment(postId: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (commentId: string) => api.patch(`/comments/${commentId}/like`),
+    mutationFn: (commentId: string) =>
+      api.post("/likes", { parentId: commentId, parentType: "comment" }),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["comments", postId] }),
   });

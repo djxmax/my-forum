@@ -12,7 +12,7 @@ export interface Post {
     id: string;
     username: string;
   };
-  likes: string[];
+  likesCount: number;
   createdAt: string;
 }
 
@@ -24,7 +24,7 @@ export interface Comment {
     username: string;
   };
   post: string;
-  likes: string[];
+  likesCount: number;
   createdAt: string;
 }
 

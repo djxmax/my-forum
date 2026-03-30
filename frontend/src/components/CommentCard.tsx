@@ -15,7 +15,7 @@ type Props = {
 export function CommentCard({ comment, onDelete, onLike }: Props) {
   const [showConfirm, setShowConfirm] = useState(false);
   const user = useAuthStore((s) => s.user);
-  const liked = user ? comment.likes.includes(user.id) : false;
+  const liked = false; //user ? comment.likes.includes(user.id) : false; TODO
   console.log("user", user);
 
   return (
@@ -56,7 +56,7 @@ export function CommentCard({ comment, onDelete, onLike }: Props) {
                     clipRule="evenodd"
                   />
                 </svg>
-                <span>{comment.likes.length}</span>
+                <span>{comment.likesCount}</span>
               </button>
             )}
           </div>
