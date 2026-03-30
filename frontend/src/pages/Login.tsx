@@ -1,37 +1,27 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
-import api from "../lib/api";
-import { useAuthStore } from "../store/authStore";
 import { Card } from "../core/Card";
 import { Stack } from "../core/Stack";
 import { Text } from "../core/Text";
 import { Input } from "../core/Input";
 import { Button } from "../core/Button";
 import { Center } from "../core/Center";
-import { AuthResponse } from "../entities";
+import { useLogin } from "../hooks/useAuth";
 
 export default function Login() {
   const navigate = useNavigate();
-  const login = useAuthStore((s) => s.login);
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
-  const mutation = useMutation({
-    mutationFn: () => api.post<AuthResponse>("/auth/login", form),
-    onSuccess: ({ data }) => {
-      login(data.access_token, data.user);
-      navigate("/");
-    },
-    onError: (err: any) => {
-      setError(err.response?.data?.message ?? "Invalid credentials");
-    },
-  });
+  const mutation = useLogin(
+    () => navigate("/"),
+    (err: any) => setError(err.response?.data?.message ?? "Invalid credentials"),
+  );
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    mutation.mutate();
+    mutation.mutate(form);
   };
 
   return (
