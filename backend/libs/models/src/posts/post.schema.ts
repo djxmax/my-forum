@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import mongoose, { HydratedDocument, Types } from 'mongoose'
 import { User } from '../users/user.schema'
+import { LikeParentType } from '../likes/like.schema'
 
 export type PostDocument = HydratedDocument<Post>
 
@@ -10,6 +11,7 @@ export type PostDocument = HydratedDocument<Post>
         virtuals: true,
         versionKey: false,
     },
+    toObject: { virtuals: true },
 })
 export class Post {
     @Prop({ required: true, trim: true })
@@ -20,11 +22,16 @@ export class Post {
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, required: true })
     author: User
-
-    @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
-    likes: Types.ObjectId[] // tableau des userId qui ont liké
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post)
 
 PostSchema.index({ createdAt: -1 })
+
+PostSchema.virtual('likesCount', {
+    ref: 'Like',
+    localField: '_id',
+    foreignField: 'parentId',
+    count: true,
+    match: { parentType: LikeParentType.POST },
+})

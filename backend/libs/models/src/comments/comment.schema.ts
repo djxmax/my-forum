@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import mongoose, { Document, HydratedDocument, Types } from 'mongoose'
 import { User } from '../users/user.schema'
 import { Post } from '../posts/post.schema'
+import { LikeParentType } from '../likes/like.schema'
 
 export type CommentDocument = HydratedDocument<Comment>
 
@@ -21,11 +22,16 @@ export class Comment {
 
     @Prop({ type: Types.ObjectId, ref: 'Post', required: true })
     post: Post // rattachement au post parent
-
-    @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
-    likes: Types.ObjectId[] // tableau des userId qui ont liké
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment)
 
 CommentSchema.index({ createdAt: -1 })
+
+CommentSchema.virtual('likesCount', {
+    ref: 'Like',
+    localField: '_id',
+    foreignField: 'parentId',
+    count: true,
+    match: { parentType: LikeParentType.COMMENT },
+})

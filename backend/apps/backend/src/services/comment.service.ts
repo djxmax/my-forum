@@ -5,16 +5,18 @@ import { Comment, CommentDocument } from '@app/models/comments/comment.schema'
 import { Post, PostDocument } from '@app/models/posts/post.schema'
 import { UserDocument } from '@app/models/users/user.schema'
 import { CreateCommentDto } from '../dto/comment.dto'
+import { Like, LikeDocument, LikeParentType } from '@app/models/likes/like.schema'
 
 @Injectable()
 export class CommentService {
     constructor(
         @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
-        @InjectModel(Post.name) private postModel: Model<PostDocument>
+        @InjectModel(Post.name) private postModel: Model<PostDocument>,
+        @InjectModel(Like.name) private likeModel: Model<LikeDocument>
     ) {}
 
     async findByPost(postId: string) {
-        return this.commentModel.find({ post: postId }).populate('author', 'username email').sort({ createdAt: 1 }).exec()
+        return this.commentModel.find({ post: postId }).populate('author', 'username email').populate('likesCount').sort({ createdAt: 1 }).exec()
     }
 
     async create(dto: CreateCommentDto, user: UserDocument) {
@@ -30,17 +32,6 @@ export class CommentService {
         return comment.populate('author', 'username email')
     }
 
-    async toggleLike(id: string, user: UserDocument) {
-        const comment = await this.commentModel.findById(id)
-        if (!comment) throw new NotFoundException('Comment not found')
-
-        const hasLiked = comment.likes.some((uid) => uid.toString() === user._id.toString())
-
-        await this.commentModel.findByIdAndUpdate(id, hasLiked ? { $pull: { likes: user._id } } : { $addToSet: { likes: user._id } })
-
-        return { liked: !hasLiked }
-    }
-
     async delete(id: string, user: UserDocument) {
         const comment = await this.commentModel.findById(id)
         if (!comment) throw new NotFoundException('Comment not found')
@@ -49,6 +40,7 @@ export class CommentService {
             throw new ForbiddenException('You can only delete your own comments')
         }
 
+        await this.likeModel.deleteMany({ parentId: id, parentType: LikeParentType.COMMENT })
         await comment.deleteOne()
         return { message: 'Comment deleted successfully' }
     }

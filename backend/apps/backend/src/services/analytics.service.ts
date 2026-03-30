@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose'
 import { Post, PostDocument } from '@app/models/posts/post.schema'
 import { User, UserDocument } from '@app/models/users/user.schema'
 import { AnalyticsResponseDto } from '../dto/analytics.dto'
+import { LikeParentType } from '@app/models/likes/like.schema'
 
 @Injectable()
 export class AnalyticsService {
@@ -16,7 +17,7 @@ export class AnalyticsService {
         const recentDaysAgo = new Date()
         recentDaysAgo.setDate(recentDaysAgo.getDate() - this.RECENT_DAYS)
 
-        const [userStats, topPosters] = await Promise.all([this.getUserStats(user.id, recentDaysAgo), this.getTopPosters()])
+        const [userStats, topPosters] = await Promise.all([this.getUserStats(user._id, recentDaysAgo), this.getTopPosters()])
 
         //on extrait les data
         const all = userStats[0].allPosts[0] ?? { totalPosts: 0, totalLikes: 0 }
@@ -44,12 +45,24 @@ export class AnalyticsService {
      * @param limitDate
      * @returns
      */
-    private getUserStats(userId: string, limitDate: Date) {
+    private getUserStats(userId: Types.ObjectId, limitDate: Date) {
         return this.postModel.aggregate([
-            { $match: { author: new Types.ObjectId(userId) } },
+            { $match: { author: userId } },
+
+            // Joint la collection Like sur chaque post
+            {
+                $lookup: {
+                    from: 'likes',
+                    localField: '_id',
+                    foreignField: 'parentId',
+                    pipeline: [{ $match: { parentType: LikeParentType.POST } }],
+                    as: 'likes',
+                },
+            },
+
+            // Calcule tous les stats en une seule passe
             {
                 $facet: {
-                    // Tous les posts + leurs likes
                     allPosts: [
                         {
                             $group: {
@@ -59,7 +72,6 @@ export class AnalyticsService {
                             },
                         },
                     ],
-                    // Posts récents + leurs likes
                     recentPosts: [
                         { $match: { createdAt: { $gte: limitDate } } },
                         {

@@ -5,6 +5,7 @@ import { PostModule } from './modules/post.module'
 import { CommentModule } from './modules/comment.module'
 import { ConfigModule } from '@nestjs/config'
 import { AnalyticsModule } from './modules/analytics.module'
+import { LikeModule } from './modules/like.module'
 
 @Module({
     imports: [
@@ -14,6 +15,7 @@ import { AnalyticsModule } from './modules/analytics.module'
         PostModule,
         CommentModule,
         AnalyticsModule,
+        LikeModule,
     ],
 })
 export class AppModule {}

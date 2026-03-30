@@ -99,34 +99,6 @@ describe('PostService', () => {
         })
     })
 
-    describe('toggleLike', () => {
-        it('should add a like when user has not liked yet', async () => {
-            const post = { ...mockPost, likes: [] }
-            mockPostModel.findById.mockResolvedValue(post)
-
-            const result = await service.toggleLike('post-id', mockUser)
-
-            expect(mockPostModel.findByIdAndUpdate).toHaveBeenCalledWith('post-id', { $addToSet: { likes: mockUser._id } })
-            expect(result).toEqual({ liked: true })
-        })
-
-        it('should remove a like when user has already liked', async () => {
-            const post = { ...mockPost, likes: [{ toString: () => 'user-id' }] }
-            mockPostModel.findById.mockResolvedValue(post)
-
-            const result = await service.toggleLike('post-id', mockUser)
-
-            expect(mockPostModel.findByIdAndUpdate).toHaveBeenCalledWith('post-id', { $pull: { likes: mockUser._id } })
-            expect(result).toEqual({ liked: false })
-        })
-
-        it('should throw NotFoundException if post does not exist', async () => {
-            mockPostModel.findById.mockResolvedValue(null)
-
-            await expect(service.toggleLike('nonexistent-id', mockUser)).rejects.toThrow(NotFoundException)
-        })
-    })
-
     describe('delete', () => {
         it('should delete post and all its comments', async () => {
             mockPostModel.findById.mockResolvedValue(mockPost)
