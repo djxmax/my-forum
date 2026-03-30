@@ -1,4 +1,5 @@
 import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator'
+import { AuthorDto } from './author.dto'
 
 export class CreatePostDto {
     @IsString()
@@ -22,4 +23,16 @@ export class UpdatePostDto {
     @IsString()
     @MinLength(1)
     text?: string
+}
+
+export class PostResponseDto {
+    id: string
+    title: string
+    content: string
+    author: AuthorDto
+    likesCount: number
+    hasLiked: boolean
+    createdAt: Date
+    updatedAt: Date
+    deletedAt: Date | null
 }

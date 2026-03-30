@@ -1,11 +1,20 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import api from "../lib/api";
-import { Post } from "../entities";
+import { PaginatedResponse, Post } from "../entities";
 
-export function usePosts() {
+export function usePosts(page = 0, limit = 10) {
   return useQuery({
-    queryKey: ["posts"],
-    queryFn: () => api.get<Post[]>("/posts").then((r) => r.data),
+    queryKey: ["posts", page, limit],
+    queryFn: () =>
+      api
+        .get<PaginatedResponse<Post>>("/posts", { params: { page, limit } })
+        .then((r) => r.data),
+    placeholderData: keepPreviousData,
   });
 }
 

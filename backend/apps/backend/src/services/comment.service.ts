@@ -4,9 +4,10 @@ import { Model } from 'mongoose'
 import { Comment, CommentDocument } from '@app/models/comments/comment.schema'
 import { Post, PostDocument } from '@app/models/posts/post.schema'
 import { UserDocument } from '@app/models/users/user.schema'
-import { CreateCommentDto } from '../dto/comment.dto'
+import { CommentResponseDto, CreateCommentDto } from '../dto/comment.dto'
 import { Like, LikeDocument, LikeParentType } from '@app/models/likes/like.schema'
 import { LikeHelperService } from './like-helper.service'
+import { getPaginationData, PaginatedResponseDto, PaginationDto } from '../dto/pagination.dto'
 
 @Injectable()
 export class CommentService {
@@ -17,14 +18,27 @@ export class CommentService {
         private likeHelperService: LikeHelperService
     ) {}
 
-    async findByPost(postId: string, user?: UserDocument) {
+    async findByPost(postId: string, user?: UserDocument, pagination: PaginationDto = new PaginationDto()): Promise<PaginatedResponseDto<CommentResponseDto>> {
+        const [page, limit, skip] = getPaginationData(pagination)
+
         const comments = await this.commentModel
             .find({ post: postId, deletedAt: null })
             .populate('author', 'username email')
             .populate('likesCount')
             .sort({ createdAt: 1 })
+            .skip(skip)
+            .limit(limit)
             .exec()
-        return this.likeHelperService.appendHasLiked(comments, user, LikeParentType.COMMENT)
+        const total = await this.commentModel.countDocuments({ post: postId, deletedAt: null })
+        const data = (await this.likeHelperService.appendHasLiked(comments, user, LikeParentType.COMMENT)) as unknown as CommentResponseDto[]
+
+        return {
+            data,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        }
     }
 
     async create(dto: CreateCommentDto, user: UserDocument) {

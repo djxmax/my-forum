@@ -43,3 +43,11 @@ export interface AnalyticsData {
   topPosters: { username: string; postCount: number }[];
   recentLimitDays: number;
 }
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  limit: number;
+  page: number;
+  total: number;
+  totalPages: number;
+}

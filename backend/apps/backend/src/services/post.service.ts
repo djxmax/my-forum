@@ -4,9 +4,10 @@ import { Model } from 'mongoose'
 import { Post, PostDocument } from '@app/models/posts/post.schema'
 import { Comment, CommentDocument } from '@app/models/comments/comment.schema'
 import { UserDocument } from '@app/models/users/user.schema'
-import { CreatePostDto } from '../dto/post.dto'
+import { CreatePostDto, PostResponseDto } from '../dto/post.dto'
 import { Like, LikeDocument, LikeParentType } from '@app/models/likes/like.schema'
 import { LikeHelperService } from './like-helper.service'
+import { PaginatedResponseDto, PaginationDto, getPaginationData } from '../dto/pagination.dto'
 
 @Injectable()
 export class PostService {
@@ -17,15 +18,27 @@ export class PostService {
         private likeHelperService: LikeHelperService
     ) {}
 
-    async findAll(user?: UserDocument) {
+    async findAll(user?: UserDocument, pagination: PaginationDto = new PaginationDto()): Promise<PaginatedResponseDto<PostResponseDto>> {
+        const [page, limit, skip] = getPaginationData(pagination)
+
         const posts = await this.postModel
             .find({ deletedAt: null })
             .populate('author', 'username email')
             .populate('likesCount')
-            .sort({ createdAt: -1 }) // les plus récents en premier
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
             .exec()
+        const total = await this.postModel.countDocuments({ deletedAt: null })
 
-        return this.likeHelperService.appendHasLiked(posts, user, LikeParentType.POST)
+        const data = (await this.likeHelperService.appendHasLiked(posts, user, LikeParentType.POST)) as unknown as PostResponseDto[]
+        return {
+            data,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        }
     }
 
     async findOne(id: string, user?: UserDocument) {

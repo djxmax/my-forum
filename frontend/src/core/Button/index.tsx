@@ -20,7 +20,7 @@ export function Button({ size = 'md', children, className, ...rest }: Props) {
         <button
             type="button"
             className={cx(
-                'rounded bg-primary-600 font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600',
+                'rounded bg-primary-600 font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-primary-300 disabled:cursor-not-allowed',
                 sizes[size],
                 className
             )}
