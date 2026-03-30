@@ -4,6 +4,8 @@ import { NotFoundException, ForbiddenException } from '@nestjs/common'
 import { PostService } from './post.service'
 import { Post } from '@app/models/posts/post.schema'
 import { Comment } from '@app/models/comments/comment.schema'
+import { Like } from '@app/models/likes/like.schema'
+import { LikeHelperService } from './like-helper.service'
 
 describe('PostService', () => {
     let service: PostService
@@ -15,18 +17,29 @@ describe('PostService', () => {
         title: 'Test Post',
         text: 'Test content',
         author: { toString: () => 'user-id' },
-        deleteOne: jest.fn().mockResolvedValue({}),
+        updateOne: jest.fn().mockResolvedValue({}),
+        toJSON: jest.fn().mockReturnValue({ _id: 'post-id', title: 'Test Post' }),
     }
 
     const mockPostModel = {
         find: jest.fn(),
+        findOne: jest.fn(),
         findById: jest.fn(),
-        findByIdAndUpdate: jest.fn().mockResolvedValue({}),
         create: jest.fn(),
+        countDocuments: jest.fn().mockResolvedValue(1),
     }
 
     const mockCommentModel = {
+        find: jest.fn().mockReturnValue({ select: jest.fn().mockResolvedValue([]) }),
+        updateMany: jest.fn().mockResolvedValue({}),
+    }
+
+    const mockLikeModel = {
         deleteMany: jest.fn().mockResolvedValue({}),
+    }
+
+    const mockLikeHelperService = {
+        appendHasLiked: jest.fn().mockResolvedValue([{ ...mockPost, hasLiked: false }]),
     }
 
     beforeEach(async () => {
@@ -35,6 +48,8 @@ describe('PostService', () => {
                 PostService,
                 { provide: getModelToken(Post.name), useValue: mockPostModel },
                 { provide: getModelToken(Comment.name), useValue: mockCommentModel },
+                { provide: getModelToken(Like.name), useValue: mockLikeModel },
+                { provide: LikeHelperService, useValue: mockLikeHelperService },
             ],
         }).compile()
 
@@ -43,41 +58,43 @@ describe('PostService', () => {
     })
 
     describe('findAll', () => {
-        it('should return all posts', async () => {
+        it('should return paginated posts', async () => {
             mockPostModel.find.mockReturnValue({
-                populate: jest.fn().mockReturnValue({
-                    sort: jest.fn().mockReturnValue({
-                        exec: jest.fn().mockResolvedValue([mockPost]),
-                    }),
-                }),
+                populate: jest.fn().mockReturnThis(),
+                sort: jest.fn().mockReturnThis(),
+                skip: jest.fn().mockReturnThis(),
+                limit: jest.fn().mockReturnThis(),
+                exec: jest.fn().mockResolvedValue([mockPost]),
             })
+            mockPostModel.countDocuments.mockResolvedValue(1)
+            mockLikeHelperService.appendHasLiked.mockResolvedValue([{ ...mockPost, hasLiked: false }])
 
             const result = await service.findAll()
 
-            expect(result).toEqual([mockPost])
+            expect(result.data).toBeDefined()
+            expect(result.total).toBe(1)
             expect(mockPostModel.find).toHaveBeenCalled()
         })
     })
 
     describe('findOne', () => {
         it('should return a post by id', async () => {
-            mockPostModel.findById.mockReturnValue({
-                populate: jest.fn().mockReturnValue({
-                    exec: jest.fn().mockResolvedValue(mockPost),
-                }),
+            mockPostModel.findOne.mockReturnValue({
+                populate: jest.fn().mockReturnThis(),
+                exec: jest.fn().mockResolvedValue(mockPost),
             })
+            mockLikeHelperService.appendHasLiked.mockResolvedValue([{ ...mockPost, hasLiked: false }])
 
             const result = await service.findOne('post-id')
 
-            expect(result).toEqual(mockPost)
-            expect(mockPostModel.findById).toHaveBeenCalledWith('post-id')
+            expect(result).toBeDefined()
+            expect(mockPostModel.findOne).toHaveBeenCalledWith({ _id: 'post-id', deletedAt: null })
         })
 
         it('should throw NotFoundException if post does not exist', async () => {
-            mockPostModel.findById.mockReturnValue({
-                populate: jest.fn().mockReturnValue({
-                    exec: jest.fn().mockResolvedValue(null),
-                }),
+            mockPostModel.findOne.mockReturnValue({
+                populate: jest.fn().mockReturnThis(),
+                exec: jest.fn().mockResolvedValue(null),
             })
 
             await expect(service.findOne('nonexistent-id')).rejects.toThrow(NotFoundException)
@@ -100,13 +117,14 @@ describe('PostService', () => {
     })
 
     describe('delete', () => {
-        it('should delete post and all its comments', async () => {
+        it('should soft delete post and its comments', async () => {
             mockPostModel.findById.mockResolvedValue(mockPost)
+            mockCommentModel.find.mockReturnValue({ select: jest.fn().mockResolvedValue([]) })
 
             const result = await service.delete('post-id', mockUser)
 
-            expect(mockCommentModel.deleteMany).toHaveBeenCalledWith({ post: 'post-id' })
-            expect(mockPost.deleteOne).toHaveBeenCalled()
+            expect(mockCommentModel.updateMany).toHaveBeenCalledWith({ post: 'post-id' }, { deletedAt: expect.any(Date) })
+            expect(mockPost.updateOne).toHaveBeenCalledWith({ deletedAt: expect.any(Date) })
             expect(result).toEqual({ message: 'Post deleted successfully' })
         })
 
@@ -121,7 +139,7 @@ describe('PostService', () => {
             mockPostModel.findById.mockResolvedValue(mockPost)
 
             await expect(service.delete('post-id', otherUser)).rejects.toThrow(ForbiddenException)
-            expect(mockPost.deleteOne).not.toHaveBeenCalled()
+            expect(mockPost.updateOne).not.toHaveBeenCalled()
         })
     })
 })
