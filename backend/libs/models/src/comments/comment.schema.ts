@@ -21,7 +21,10 @@ export class Comment {
     author: User
 
     @Prop({ type: Types.ObjectId, ref: 'Post', required: true })
-    post: Post // rattachement au post parent
+    post: Post
+
+    @Prop({ default: null })
+    deletedAt: Date | null
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment)

@@ -19,7 +19,7 @@ export class PostService {
 
     async findAll(user?: UserDocument) {
         const posts = await this.postModel
-            .find()
+            .find({ deletedAt: null })
             .populate('author', 'username email')
             .populate('likesCount')
             .sort({ createdAt: -1 }) // les plus récents en premier
@@ -29,7 +29,7 @@ export class PostService {
     }
 
     async findOne(id: string, user?: UserDocument) {
-        const post = await this.postModel.findById(id).populate('author', 'username email').populate('likesCount').exec()
+        const post = await this.postModel.findOne({ _id: id, deletedAt: null }).populate('author', 'username email').populate('likesCount').exec()
         if (!post) throw new NotFoundException('Post not found')
         const [postWithLike] = await this.likeHelperService.appendHasLiked([post], user, LikeParentType.POST)
         return postWithLike
@@ -54,9 +54,10 @@ export class PostService {
         const comments = await this.commentModel.find({ post: id }).select('_id')
         const commentIds = comments.map((c) => c._id)
 
-        await this.commentModel.deleteMany({ post: id })
+        await this.commentModel.updateMany({ post: id }, { deletedAt: new Date() })
         await this.likeModel.deleteMany({ parentId: id, parentType: LikeParentType.POST })
-        ;(await this.likeModel.deleteMany({ parentId: { $in: commentIds }, parentType: LikeParentType.COMMENT }), await post.deleteOne())
+        await this.likeModel.deleteMany({ parentId: { $in: commentIds }, parentType: LikeParentType.COMMENT })
+        await post.updateOne({ deletedAt: new Date() })
         return { message: 'Post deleted successfully' }
     }
 }

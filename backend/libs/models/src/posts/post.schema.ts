@@ -22,6 +22,9 @@ export class Post {
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, required: true })
     author: User
+
+    @Prop({ default: null })
+    deletedAt: Date | null
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post)

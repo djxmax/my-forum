@@ -19,7 +19,7 @@ export class CommentService {
 
     async findByPost(postId: string, user?: UserDocument) {
         const comments = await this.commentModel
-            .find({ post: postId })
+            .find({ post: postId, deletedAt: null })
             .populate('author', 'username email')
             .populate('likesCount')
             .sort({ createdAt: 1 })
@@ -49,7 +49,7 @@ export class CommentService {
         }
 
         await this.likeModel.deleteMany({ parentId: id, parentType: LikeParentType.COMMENT })
-        await comment.deleteOne()
+        await comment.updateOne({ deletedAt: new Date() })
         return { message: 'Comment deleted successfully' }
     }
 }
