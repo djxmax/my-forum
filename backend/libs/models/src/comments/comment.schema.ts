@@ -30,6 +30,7 @@ export class Comment {
 export const CommentSchema = SchemaFactory.createForClass(Comment)
 
 CommentSchema.index({ createdAt: -1 })
+CommentSchema.index({ deletedAt: 1 })
 
 CommentSchema.virtual('likesCount', {
     ref: 'Like',

@@ -30,6 +30,7 @@ export class Post {
 export const PostSchema = SchemaFactory.createForClass(Post)
 
 PostSchema.index({ createdAt: -1 })
+PostSchema.index({ deletedAt: 1 })
 
 PostSchema.virtual('likesCount', {
     ref: 'Like',
