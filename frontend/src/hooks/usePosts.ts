@@ -15,6 +15,7 @@ export function usePosts(page = 0, limit = 10) {
         .get<PaginatedResponse<Post>>("/posts", { params: { page, limit } })
         .then((r) => r.data),
     placeholderData: keepPreviousData,
+    staleTime: 5000,
   });
 }
 

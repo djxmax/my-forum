@@ -3,7 +3,9 @@ import { useAuthStore } from "../store/authStore";
 import { Stack } from "../core/Stack";
 import { Text } from "../core/Text";
 import { Button } from "../core/Button";
+
 import { PostCard } from "../components/PostCard";
+import { Pagination } from "../components/Pagination";
 import { usePosts } from "../hooks/usePosts";
 import { useState } from "react";
 
@@ -36,31 +38,15 @@ export default function Posts() {
           onClick={() => navigate(`/posts/${post.id}`)}
         />
       ))}
-      <div className="flex w-full">
-        <div className="basis-1/3 flex justify-start">
-          <Button
-            size="xl"
-            disabled={page == 0}
-            onClick={() => setPage((old) => old - 1)}
-          >
-            Précédent
-          </Button>
-        </div>
-        <div className="basis-1/3 flex justify-center items-center">
-          <Text>
-            Page {page + 1} sur {posts?.totalPages} - {posts?.total} posts
-          </Text>
-        </div>
-        <div className="basis-1/3 flex justify-end">
-          <Button
-            size="xl"
-            disabled={isLoading || posts?.totalPages == page + 1}
-            onClick={() => setPage((old) => old + 1)}
-          >
-            Suivant
-          </Button>
-        </div>
-      </div>
+      <Pagination
+        page={page}
+        totalPages={posts?.totalPages}
+        total={posts?.total}
+        totalLabel="post(s)"
+        isLoading={isLoading}
+        onPrev={() => setPage((old) => old - 1)}
+        onNext={() => setPage((old) => old + 1)}
+      />
     </Stack>
   );
 }

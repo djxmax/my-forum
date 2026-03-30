@@ -1,15 +1,24 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import api from "../lib/api";
 import { Comment, PaginatedResponse } from "../entities";
 
-export function useComments(postId: string | undefined) {
+export function useComments(postId: string | undefined, page = 0, limit = 10) {
   return useQuery({
-    queryKey: ["comments", postId],
+    queryKey: ["comments", postId, page, limit],
     queryFn: () =>
       api
-        .get<PaginatedResponse<Comment>>(`/comments/post/${postId}`)
+        .get<
+          PaginatedResponse<Comment>
+        >(`/comments/post/${postId}?page=${page}&limit=${limit}`)
         .then((r) => r.data),
     enabled: !!postId,
+    placeholderData: keepPreviousData,
+    staleTime: 5000,
   });
 }
 
