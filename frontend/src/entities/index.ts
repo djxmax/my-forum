@@ -13,6 +13,7 @@ export interface Post {
     username: string;
   };
   likesCount: number;
+  hasLiked: boolean;
   createdAt: string;
 }
 
@@ -25,6 +26,7 @@ export interface Comment {
   };
   post: string;
   likesCount: number;
+  hasLiked: boolean;
   createdAt: string;
 }
 

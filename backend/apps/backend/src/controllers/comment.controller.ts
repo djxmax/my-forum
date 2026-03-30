@@ -4,14 +4,16 @@ import { CreateCommentDto } from '../dto/comment.dto'
 import { JwtAuthGuard } from '@app/auth/jwt/jwt-auth.guard'
 import { CurrentUser } from '@app/auth'
 import { UserDocument } from '@app/models/users/user.schema'
+import { OptionalJwtAuthGuard } from '@app/auth/jwt/optional-jwt-auth-guard'
 
 @Controller('comments')
 export class CommentController {
     constructor(private commentService: CommentService) {}
 
     @Get('post/:postId')
-    findByPost(@Param('postId') postId: string) {
-        return this.commentService.findByPost(postId)
+    @UseGuards(OptionalJwtAuthGuard)
+    findByPost(@Param('postId') postId: string, @CurrentUser() user: UserDocument) {
+        return this.commentService.findByPost(postId, user)
     }
 
     @Post()

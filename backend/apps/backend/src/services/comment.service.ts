@@ -6,17 +6,25 @@ import { Post, PostDocument } from '@app/models/posts/post.schema'
 import { UserDocument } from '@app/models/users/user.schema'
 import { CreateCommentDto } from '../dto/comment.dto'
 import { Like, LikeDocument, LikeParentType } from '@app/models/likes/like.schema'
+import { LikeHelperService } from './like-helper.service'
 
 @Injectable()
 export class CommentService {
     constructor(
         @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
         @InjectModel(Post.name) private postModel: Model<PostDocument>,
-        @InjectModel(Like.name) private likeModel: Model<LikeDocument>
+        @InjectModel(Like.name) private likeModel: Model<LikeDocument>,
+        private likeHelperService: LikeHelperService
     ) {}
 
-    async findByPost(postId: string) {
-        return this.commentModel.find({ post: postId }).populate('author', 'username email').populate('likesCount').sort({ createdAt: 1 }).exec()
+    async findByPost(postId: string, user?: UserDocument) {
+        const comments = await this.commentModel
+            .find({ post: postId })
+            .populate('author', 'username email')
+            .populate('likesCount')
+            .sort({ createdAt: 1 })
+            .exec()
+        return this.likeHelperService.appendHasLiked(comments, user, LikeParentType.COMMENT)
     }
 
     async create(dto: CreateCommentDto, user: UserDocument) {

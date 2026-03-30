@@ -4,19 +4,22 @@ import { CreatePostDto } from '../dto/post.dto'
 import { JwtAuthGuard } from '@app/auth/jwt/jwt-auth.guard'
 import { CurrentUser } from '@app/auth/decorators/current-user.decorator'
 import { UserDocument } from '@app/models/users/user.schema'
+import { OptionalJwtAuthGuard } from '@app/auth/jwt/optional-jwt-auth-guard'
 
 @Controller('posts')
 export class PostController {
     constructor(private postService: PostService) {}
 
     @Get()
-    findAll() {
-        return this.postService.findAll()
+    @UseGuards(OptionalJwtAuthGuard)
+    findAll(@CurrentUser() user: UserDocument) {
+        return this.postService.findAll(user)
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.postService.findOne(id)
+    @UseGuards(OptionalJwtAuthGuard)
+    findOne(@Param('id') id: string, @CurrentUser() user: UserDocument) {
+        return this.postService.findOne(id, user)
     }
 
     @Post()

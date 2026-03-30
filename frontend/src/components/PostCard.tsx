@@ -16,8 +16,6 @@ type Props = {
 
 export function PostCard({ post, onDelete, onClick, onLike, compact }: Props) {
   const [showConfirm, setShowConfirm] = useState(false);
-  const user = useAuthStore((s) => s.user);
-  const liked = false; // user ? post.likes.includes(user.id) : false;
 
   return (
     <>
@@ -65,7 +63,7 @@ export function PostCard({ post, onDelete, onClick, onLike, compact }: Props) {
                     e.stopPropagation();
                     onLike();
                   }}
-                  className={`flex items-center gap-1 transition-colors ${liked ? "text-red-500" : "hover:text-red-400"}`}
+                  className={`flex items-center gap-1 transition-colors ${post.hasLiked ? "text-red-500" : "hover:text-red-400"}`}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

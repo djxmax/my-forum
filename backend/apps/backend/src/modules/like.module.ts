@@ -5,6 +5,7 @@ import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { LikeController } from '../controllers/like.controller'
 import { LikeService } from '../services/like.service'
+import { LikeHelperService } from '../services/like-helper.service'
 
 @Module({
     imports: [
@@ -15,7 +16,7 @@ import { LikeService } from '../services/like.service'
         ]),
     ],
     controllers: [LikeController],
-    providers: [LikeService],
-    exports: [LikeService],
+    providers: [LikeService, LikeHelperService],
+    exports: [LikeService, LikeHelperService],
 })
 export class LikeModule {}

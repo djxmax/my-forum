@@ -6,6 +6,7 @@ import { Comment, CommentSchema } from '@app/models/comments/comment.schema'
 import { Post, PostSchema } from '@app/models/posts/post.schema'
 import { AuthModule } from '@app/auth'
 import { Like, LikeSchema } from '@app/models/likes/like.schema'
+import { LikeModule } from './like.module'
 
 @Module({
     imports: [
@@ -15,6 +16,7 @@ import { Like, LikeSchema } from '@app/models/likes/like.schema'
             { name: Post.name, schema: PostSchema },
             { name: Like.name, schema: LikeSchema },
         ]),
+        LikeModule,
     ],
     controllers: [CommentController],
     providers: [CommentService],

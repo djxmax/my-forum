@@ -14,9 +14,6 @@ type Props = {
 
 export function CommentCard({ comment, onDelete, onLike }: Props) {
   const [showConfirm, setShowConfirm] = useState(false);
-  const user = useAuthStore((s) => s.user);
-  const liked = false; //user ? comment.likes.includes(user.id) : false; TODO
-  console.log("user", user);
 
   return (
     <>
@@ -41,7 +38,7 @@ export function CommentCard({ comment, onDelete, onLike }: Props) {
             {onLike && (
               <button
                 onClick={onLike}
-                className={`flex items-center gap-1 transition-colors ${liked ? "text-red-500" : "hover:text-red-400"}`}
+                className={`flex items-center gap-1 transition-colors ${comment.hasLiked ? "text-red-500" : "hover:text-red-400"}`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
