@@ -1,11 +1,15 @@
-import { Injectable, ExecutionContext } from '@nestjs/common'
+import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 
 @Injectable()
 export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
-    // Override pour ne pas lancer d'erreur si pas de token
-    handleRequest(err: any, user: any) {
-        return user ?? null // retourne l'user si connecté, null sinon
+    handleRequest(err: any, user: any, info: any) {
+        // Token fourni mais invalide (expiré, mauvaise signature, etc.)
+        if (info?.name === 'JsonWebTokenError' || info?.name === 'TokenExpiredError' || err) {
+            throw new UnauthorizedException(info?.message ?? err?.message)
+        }
+        // Pas de token ou token ok : on laisse passer et on donne le usersi token ok
+        return user ?? null
     }
 
     canActivate(context: ExecutionContext) {

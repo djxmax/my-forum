@@ -9,12 +9,11 @@ import { User, UserDocument } from '@app/models/users/user.schema'
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), 
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
             secretOrKey: process.env.JWT_SECRET,
         })
     }
-
 
     async validate(payload: { sub: string; email: string }) {
         const user = await this.userModel.findById(payload.sub)
