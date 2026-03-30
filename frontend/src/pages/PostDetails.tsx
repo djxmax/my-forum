@@ -1,69 +1,28 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "../lib/api";
 import { useAuthStore } from "../store/authStore";
 import { Stack } from "../core/Stack";
 import { Text } from "../core/Text";
-import { Post, Comment } from "../entities";
 import { PostCard } from "../components/PostCard";
 import { CommentCard } from "../components/CommentCard";
 import { CommentForm } from "../components/CommentForm";
+import { usePost, useDeletePost, useLikePost } from "../hooks/usePosts";
+import { useComments, useCreateComment, useDeleteComment, useLikeComment } from "../hooks/useComments";
 
 export default function PostDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [comment, setComment] = useState("");
 
-  // Récupère le post
-  const { data: post, isLoading: postLoading } = useQuery({
-    queryKey: ["posts", id],
-    queryFn: () => api.get<Post>(`/posts/${id}`).then((r) => r.data),
-  });
-
-  // Récupère les commentaires
-  const { data: comments, isLoading: commentsLoading } = useQuery({
-    queryKey: ["comments", id],
-    queryFn: () =>
-      api.get<Comment[]>(`/comments/post/${id}`).then((r) => r.data),
-  });
-
-  // Créer un commentaire
-  const createComment = useMutation({
-    mutationFn: () => api.post("/comments", { text: comment, postId: id }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments", id] });
-      setComment("");
-    },
-  });
-
-  // Supprimer un commentaire
-  const deleteComment = useMutation({
-    mutationFn: (commentId: string) => api.delete(`/comments/${commentId}`),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["comments", id] }),
-  });
-
-  // Supprimer le post
-  const deletePost = useMutation({
-    mutationFn: () => api.delete(`/posts/${id}`),
-    onSuccess: () => navigate("/"),
-  });
-
-  // Liker un post
-  const likePost = useMutation({
-    mutationFn: () => api.patch(`/posts/${id}/like`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts", id] }),
-  });
-
-  // Liker un commentaire
-  const likeComment = useMutation({
-    mutationFn: (commentId: string) => api.patch(`/comments/${commentId}/like`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["comments", id] }),
-  });
+  const { data: post, isLoading: postLoading } = usePost(id);
+  const { data: comments, isLoading: commentsLoading } = useComments(id);
+  const createComment = useCreateComment(id, () => setComment(""));
+  const deleteComment = useDeleteComment(id);
+  const deletePost = useDeletePost(id, () => navigate("/"));
+  const likePost = useLikePost(id);
+  const likeComment = useLikeComment(id);
 
   if (postLoading) return <Text variant="paragraph">Chargement...</Text>;
   if (!post) return <Text variant="paragraph">Post introuvable.</Text>;
@@ -105,7 +64,7 @@ export default function PostDetail() {
           <CommentForm
             value={comment}
             onChange={setComment}
-            onSubmit={() => createComment.mutate()}
+            onSubmit={() => createComment.mutate(comment)}
             isPending={createComment.isPending}
           />
         )}

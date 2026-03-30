@@ -1,34 +1,26 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "../lib/api";
 import { Card } from "../core/Card";
 import { Stack } from "../core/Stack";
 import { Text } from "../core/Text";
 import { Button } from "../core/Button";
 import { Input } from "../core/Input";
+import { useCreatePost } from "../hooks/usePosts";
 
 export default function CreatePost() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [form, setForm] = useState({ title: "", text: "" });
   const [error, setError] = useState("");
 
-  const mutation = useMutation({
-    mutationFn: () => api.post("/posts", form),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      navigate("/");
-    },
-    onError: (err: any) => {
-      setError(err.response?.data?.message ?? "Une erreur est survenue");
-    },
-  });
+  const mutation = useCreatePost(
+    () => navigate("/"),
+    (err: any) => setError(err.response?.data?.message ?? "Une erreur est survenue"),
+  );
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    mutation.mutate();
+    mutation.mutate(form);
   };
 
   return (
