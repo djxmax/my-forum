@@ -7,31 +7,17 @@ import { Input } from "../core/Input";
 import { Button } from "../core/Button";
 import { Center } from "../core/Center";
 import { useRegister } from "../hooks/useAuth";
+import { Formik, Form, Field, FieldProps } from "formik";
+import { RegisterSchema, UserRegister } from "../entities";
 
 export default function Register() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
   const [error, setError] = useState("");
 
   const mutation = useRegister(
     () => navigate("/"),
     (err: any) => setError(err.response?.data?.message ?? "An error occurred"),
   );
-
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    if (form.password !== form.confirmPassword) {
-      setError("Les mots de passe ne correspondent pas");
-      return;
-    }
-    mutation.mutate(form);
-  };
 
   return (
     <Center>
@@ -46,63 +32,85 @@ export default function Register() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit}>
-              <Stack spacing={4}>
-                <Input
-                  id="username"
-                  label="Nom"
-                  type="text"
-                  required
-                  placeholder="johndoe"
-                  value={form.username}
-                  onChange={(e) =>
-                    setForm({ ...form, username: e.target.value })
-                  }
-                />
-                <Input
-                  id="email"
-                  label="Email"
-                  type="email"
-                  required
-                  placeholder="you@example.com"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                />
-                <Input
-                  id="password"
-                  label="Mot de passe"
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
-                />
-                <Input
-                  id="confirmPassword"
-                  label="Confirmer le mot de passe"
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={form.confirmPassword}
-                  onChange={(e) =>
-                    setForm({ ...form, confirmPassword: e.target.value })
-                  }
-                  errorLabel={
-                    form.confirmPassword &&
-                    form.password !== form.confirmPassword
-                      ? "Les mots de passe ne correspondent pas"
-                      : undefined
-                  }
-                />
-                <Button type="submit" disabled={mutation.isPending} size="lg">
-                  {mutation.isPending
-                    ? "Création du compte..."
-                    : "Créer le compte"}
-                </Button>
-              </Stack>
-            </form>
+            <Formik
+              initialValues={{
+                username: "",
+                email: "",
+                password: "",
+                confirmPassword: "",
+              }}
+              validationSchema={RegisterSchema}
+              onSubmit={(values) => {
+                const userRegister = {
+                  username: values.username,
+                  email: values.email,
+                  password: values.password,
+                } as UserRegister;
+                mutation.mutate(userRegister);
+              }}
+            >
+              <Form>
+                <Stack spacing={4}>
+                  <Field name="username">
+                    {({ field, meta }: FieldProps) => (
+                      <Input
+                        {...field}
+                        type="text"
+                        label="Nom"
+                        placeholder="johndoe"
+                        errorLabel={
+                          meta.touched && meta.error ? meta.error : undefined
+                        }
+                      />
+                    )}
+                  </Field>
+                  <Field name="email">
+                    {({ field, meta }: FieldProps) => (
+                      <Input
+                        {...field}
+                        type="email"
+                        label="Email"
+                        placeholder="you@example.com"
+                        errorLabel={
+                          meta.touched && meta.error ? meta.error : undefined
+                        }
+                      />
+                    )}
+                  </Field>
+                  <Field name="password">
+                    {({ field, meta }: FieldProps) => (
+                      <Input
+                        {...field}
+                        type="password"
+                        label="Mot de passe"
+                        placeholder="••••••••"
+                        errorLabel={
+                          meta.touched && meta.error ? meta.error : undefined
+                        }
+                      />
+                    )}
+                  </Field>
+                  <Field name="confirmPassword">
+                    {({ field, meta }: FieldProps) => (
+                      <Input
+                        {...field}
+                        type="password"
+                        label="Confirmer du mot de passe"
+                        placeholder="••••••••"
+                        errorLabel={
+                          meta.touched && meta.error ? meta.error : undefined
+                        }
+                      />
+                    )}
+                  </Field>
+                  <Button type="submit" disabled={mutation.isPending} size="lg">
+                    {mutation.isPending
+                      ? "Création du compte..."
+                      : "Créer un compte"}
+                  </Button>
+                </Stack>
+              </Form>
+            </Formik>
 
             <Text variant="paragraph">
               Vous avez déjà un compte ?{" "}

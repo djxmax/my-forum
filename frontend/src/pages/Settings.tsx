@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import api from "../lib/api";
 import { Card } from "../core/Card";
@@ -6,41 +6,24 @@ import { Stack } from "../core/Stack";
 import { Text } from "../core/Text";
 import { Input } from "../core/Input";
 import { Button } from "../core/Button";
+import { Formik, Form, Field, FieldProps } from "formik";
+import { PasswordChange, PasswordChangeSchema } from "../entities";
+import { usePasswordChange } from "../hooks/useAuth";
 
 export default function Settings() {
-  const [form, setForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const resetFormRef = useRef<() => void>(null);
 
-  const mutation = useMutation({
-    mutationFn: () =>
-      api.patch("/auth/password", {
-        currentPassword: form.currentPassword,
-        newPassword: form.newPassword,
-      }),
-    onSuccess: () => {
+  const mutation = usePasswordChange(
+    () => {
       setSuccess(true);
-      setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      resetFormRef.current?.();
     },
-    onError: (err: any) => {
+    (err: any) => {
       setError(err.response?.data?.message ?? "Une erreur est survenue");
     },
-  });
-
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    setSuccess(false);
-    if (form.newPassword !== form.confirmPassword) {
-      setError("Les nouveaux mots de passe ne correspondent pas");
-      return;
-    }
-    mutation.mutate();
-  };
+  );
 
   return (
     <Stack spacing={6}>
@@ -61,60 +44,71 @@ export default function Settings() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <Stack spacing={4}>
-              <Input
-                id="currentPassword"
-                label="Mot de passe actuel"
-                type="password"
-                required
-                placeholder="••••••••"
-                value={form.currentPassword}
-                onChange={(e) =>
-                  setForm({ ...form, currentPassword: e.target.value })
-                }
-              />
-              <Input
-                id="newPassword"
-                label="Nouveau mot de passe"
-                type="password"
-                required
-                placeholder="••••••••"
-                value={form.newPassword}
-                onChange={(e) =>
-                  setForm({ ...form, newPassword: e.target.value })
-                }
-              />
-              <Input
-                id="confirmPassword"
-                label="Confirmer le nouveau mot de passe"
-                type="password"
-                required
-                placeholder="••••••••"
-                value={form.confirmPassword}
-                onChange={(e) =>
-                  setForm({ ...form, confirmPassword: e.target.value })
-                }
-                errorLabel={
-                  form.confirmPassword &&
-                  form.newPassword !== form.confirmPassword
-                    ? "Les mots de passe ne correspondent pas"
-                    : undefined
-                }
-              />
-              <Button
-                type="submit"
-                disabled={
-                  mutation.isPending ||
-                  !form.currentPassword ||
-                  !form.newPassword ||
-                  !form.confirmPassword
-                }
-              >
-                {mutation.isPending ? "Mise à jour..." : "Mettre à jour"}
-              </Button>
-            </Stack>
-          </form>
+          <Formik
+            initialValues={{
+              currentPassword: "",
+              newPassword: "",
+              confirmNewPassword: "",
+            }}
+            validationSchema={PasswordChangeSchema}
+            onSubmit={(values, { resetForm }) => {
+              resetFormRef.current = resetForm;
+              const userRegister = {
+                currentPassword: values.currentPassword,
+                newPassword: values.newPassword,
+              } as PasswordChange;
+              mutation.mutate(userRegister);
+            }}
+          >
+            <Form>
+              <Stack spacing={4}>
+                <Field name="currentPassword">
+                  {({ field, meta }: FieldProps) => (
+                    <Input
+                      {...field}
+                      type="password"
+                      label="Mot de passe actuel"
+                      placeholder="••••••••"
+                      errorLabel={
+                        meta.touched && meta.error ? meta.error : undefined
+                      }
+                    />
+                  )}
+                </Field>
+                <Field name="newPassword">
+                  {({ field, meta }: FieldProps) => (
+                    <Input
+                      {...field}
+                      type="password"
+                      label="Nouveau mot de passe"
+                      placeholder="••••••••"
+                      errorLabel={
+                        meta.touched && meta.error ? meta.error : undefined
+                      }
+                    />
+                  )}
+                </Field>
+                <Field name="confirmNewPassword">
+                  {({ field, meta }: FieldProps) => (
+                    <Input
+                      {...field}
+                      type="password"
+                      label="Confirmer le nouveau mot de passe"
+                      placeholder="••••••••"
+                      errorLabel={
+                        meta.touched && meta.error ? meta.error : undefined
+                      }
+                    />
+                  )}
+                </Field>
+                <Button type="submit" disabled={mutation.isPending} size="lg">
+                  {mutation.isPending
+                    ? "Enregistrement en cours..."
+                    : "Enregistrer"}
+                </Button>
+              </Stack>
+            </Form>
+          </Formik>
         </Stack>
       </Card>
     </Stack>
