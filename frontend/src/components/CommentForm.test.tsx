@@ -4,8 +4,6 @@ import { CommentForm } from './CommentForm'
 
 describe('CommentForm', () => {
     const defaultProps = {
-        value: '',
-        onChange: vi.fn(),
         onSubmit: vi.fn(),
         isPending: false,
     }
@@ -16,41 +14,38 @@ describe('CommentForm', () => {
 
     it('renders textarea and submit button', () => {
         render(<CommentForm {...defaultProps} />)
-        expect(screen.getByPlaceholderText('Écrire un commentaire...')).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: 'Commenter' })).toBeInTheDocument()
-    })
-
-    it('calls onChange when user types', async () => {
-        const user = userEvent.setup()
-        render(<CommentForm {...defaultProps} />)
-        await user.type(screen.getByPlaceholderText('Écrire un commentaire...'), 'Bonjour')
-        expect(defaultProps.onChange).toHaveBeenCalled()
-    })
-
-    it('button is disabled when value is empty', () => {
-        render(<CommentForm {...defaultProps} value="" />)
-        expect(screen.getByRole('button')).toBeDisabled()
+        expect(screen.getByPlaceholderText('Contenu du commentaire')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Publier' })).toBeInTheDocument()
     })
 
     it('button is disabled when isPending', () => {
-        render(<CommentForm {...defaultProps} value="texte" isPending={true} />)
+        render(<CommentForm {...defaultProps} isPending={true} />)
         expect(screen.getByRole('button')).toBeDisabled()
     })
 
-    it('button is enabled when value is provided and not pending', () => {
-        render(<CommentForm {...defaultProps} value="mon commentaire" />)
+    it('button is enabled when not pending', () => {
+        render(<CommentForm {...defaultProps} />)
         expect(screen.getByRole('button')).not.toBeDisabled()
     })
 
-    it('shows "Envoi..." when isPending', () => {
-        render(<CommentForm {...defaultProps} value="texte" isPending={true} />)
-        expect(screen.getByRole('button', { name: 'Envoi...' })).toBeInTheDocument()
+    it('shows "Publication..." when isPending', () => {
+        render(<CommentForm {...defaultProps} isPending={true} />)
+        expect(screen.getByRole('button', { name: 'Publication...' })).toBeInTheDocument()
     })
 
-    it('calls onSubmit when button clicked', async () => {
+    it('calls onSubmit with text when form is submitted with valid content', async () => {
         const user = userEvent.setup()
-        render(<CommentForm {...defaultProps} value="mon commentaire" />)
+        render(<CommentForm {...defaultProps} />)
+        await user.type(screen.getByPlaceholderText('Contenu du commentaire'), 'Mon commentaire valide')
         await user.click(screen.getByRole('button'))
-        expect(defaultProps.onSubmit).toHaveBeenCalledTimes(1)
+        expect(defaultProps.onSubmit).toHaveBeenCalledWith('Mon commentaire valide', expect.any(Function))
+    })
+
+    it('does not call onSubmit when text is too short', async () => {
+        const user = userEvent.setup()
+        render(<CommentForm {...defaultProps} />)
+        await user.type(screen.getByPlaceholderText('Contenu du commentaire'), 'court')
+        await user.click(screen.getByRole('button'))
+        expect(defaultProps.onSubmit).not.toHaveBeenCalled()
     })
 })
