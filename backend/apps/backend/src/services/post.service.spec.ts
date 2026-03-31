@@ -17,7 +17,7 @@ describe('PostService', () => {
         title: 'Test Post',
         text: 'Test content',
         author: { toString: () => 'user-id' },
-        updateOne: jest.fn().mockResolvedValue({}),
+        delete: jest.fn().mockResolvedValue({}),
         toJSON: jest.fn().mockReturnValue({ _id: 'post-id', title: 'Test Post' }),
     }
 
@@ -30,8 +30,8 @@ describe('PostService', () => {
     }
 
     const mockCommentModel = {
-        find: jest.fn().mockReturnValue({ select: jest.fn().mockResolvedValue([]) }),
-        updateMany: jest.fn().mockResolvedValue({}),
+        findWithDeleted: jest.fn().mockReturnValue({ select: jest.fn().mockResolvedValue([]) }),
+        delete: jest.fn().mockResolvedValue({}),
     }
 
     const mockLikeModel = {
@@ -88,7 +88,7 @@ describe('PostService', () => {
             const result = await service.findOne('post-id')
 
             expect(result).toBeDefined()
-            expect(mockPostModel.findOne).toHaveBeenCalledWith({ _id: 'post-id', deletedAt: null })
+            expect(mockPostModel.findOne).toHaveBeenCalledWith({ _id: 'post-id' })
         })
 
         it('should throw NotFoundException if post does not exist', async () => {
@@ -119,12 +119,12 @@ describe('PostService', () => {
     describe('delete', () => {
         it('should soft delete post and its comments', async () => {
             mockPostModel.findById.mockResolvedValue(mockPost)
-            mockCommentModel.find.mockReturnValue({ select: jest.fn().mockResolvedValue([]) })
+            mockCommentModel.findWithDeleted.mockReturnValue({ select: jest.fn().mockResolvedValue([]) })
 
             const result = await service.delete('post-id', mockUser)
 
-            expect(mockCommentModel.updateMany).toHaveBeenCalledWith({ post: 'post-id' }, { deletedAt: expect.any(Date) })
-            expect(mockPost.updateOne).toHaveBeenCalledWith({ deletedAt: expect.any(Date) })
+            expect(mockCommentModel.delete).toHaveBeenCalledWith({ post: 'post-id' })
+            expect(mockPost.delete).toHaveBeenCalled()
             expect(result).toEqual({ message: 'Post deleted successfully' })
         })
 
@@ -139,7 +139,7 @@ describe('PostService', () => {
             mockPostModel.findById.mockResolvedValue(mockPost)
 
             await expect(service.delete('post-id', otherUser)).rejects.toThrow(ForbiddenException)
-            expect(mockPost.updateOne).not.toHaveBeenCalled()
+            expect(mockPost.delete).not.toHaveBeenCalled()
         })
     })
 })

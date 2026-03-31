@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
-import { Comment, CommentDocument } from '@app/models/comments/comment.schema'
-import { Post, PostDocument } from '@app/models/posts/post.schema'
+import { Comment, CommentDocument, CommentModel } from '@app/models/comments/comment.schema'
+import { Post, PostDocument, PostModel } from '@app/models/posts/post.schema'
 import { UserDocument } from '@app/models/users/user.schema'
 import { CommentResponseDto, CreateCommentDto } from '../dto/comment.dto'
 import { Like, LikeDocument, LikeParentType } from '@app/models/likes/like.schema'
@@ -12,8 +12,8 @@ import { getPaginationData, PaginatedResponseDto, PaginationDto } from '../dto/p
 @Injectable()
 export class CommentService {
     constructor(
-        @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
-        @InjectModel(Post.name) private postModel: Model<PostDocument>,
+        @InjectModel(Comment.name) private commentModel: CommentModel,
+        @InjectModel(Post.name) private postModel: PostModel,
         @InjectModel(Like.name) private likeModel: Model<LikeDocument>,
         private likeHelperService: LikeHelperService
     ) {}
@@ -22,14 +22,13 @@ export class CommentService {
         const [page, limit, skip] = getPaginationData(pagination)
 
         const comments = await this.commentModel
-            .find({ post: postId, deletedAt: null })
+            .find({ post: postId })
             .populate('author', 'username email')
-            .populate('likesCount')
             .sort({ createdAt: 1 })
             .skip(skip)
             .limit(limit)
             .exec()
-        const total = await this.commentModel.countDocuments({ post: postId, deletedAt: null })
+        const total = await this.commentModel.countDocuments({ post: postId })
         const data = (await this.likeHelperService.appendHasLiked(comments, user, LikeParentType.COMMENT)) as unknown as CommentResponseDto[]
 
         return {
@@ -63,7 +62,7 @@ export class CommentService {
         }
 
         await this.likeModel.deleteMany({ parentId: id, parentType: LikeParentType.COMMENT })
-        await comment.updateOne({ deletedAt: new Date() })
+        await comment.delete()
         return { message: 'Comment deleted successfully' }
     }
 }

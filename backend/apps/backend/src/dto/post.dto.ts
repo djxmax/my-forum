@@ -34,5 +34,4 @@ export class PostResponseDto {
     hasLiked: boolean
     createdAt: Date
     updatedAt: Date
-    deletedAt: Date | null
 }

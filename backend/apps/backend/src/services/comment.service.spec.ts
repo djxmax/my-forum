@@ -18,7 +18,7 @@ describe('CommentService', () => {
         _id: 'comment-id',
         text: 'Test comment',
         author: { toString: () => 'user-id' },
-        updateOne: jest.fn().mockResolvedValue({}),
+        delete: jest.fn().mockResolvedValue({}),
         populate: jest.fn().mockResolvedValue({ _id: 'comment-id', text: 'Test comment' }),
         toJSON: jest.fn().mockReturnValue({ _id: 'comment-id', text: 'Test comment' }),
     }
@@ -73,7 +73,7 @@ describe('CommentService', () => {
 
             expect(result.data).toBeDefined()
             expect(result.total).toBe(1)
-            expect(mockCommentModel.find).toHaveBeenCalledWith({ post: 'post-id', deletedAt: null })
+            expect(mockCommentModel.find).toHaveBeenCalledWith({ post: 'post-id' })
         })
     })
 
@@ -107,7 +107,7 @@ describe('CommentService', () => {
             const result = await service.delete('comment-id', mockUser)
 
             expect(mockLikeModel.deleteMany).toHaveBeenCalledWith({ parentId: 'comment-id', parentType: 'comment' })
-            expect(mockComment.updateOne).toHaveBeenCalledWith({ deletedAt: expect.any(Date) })
+            expect(mockComment.delete).toHaveBeenCalled()
             expect(result).toEqual({ message: 'Comment deleted successfully' })
         })
 
@@ -122,7 +122,7 @@ describe('CommentService', () => {
             mockCommentModel.findById.mockResolvedValue(mockComment)
 
             await expect(service.delete('comment-id', otherUser)).rejects.toThrow(ForbiddenException)
-            expect(mockComment.updateOne).not.toHaveBeenCalled()
+            expect(mockComment.delete).not.toHaveBeenCalled()
         })
     })
 })

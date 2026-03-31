@@ -1,10 +1,13 @@
 import { Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose'
-import mongoose, { Document, HydratedDocument, Types } from 'mongoose'
+import mongoose, { HydratedDocument, Types } from 'mongoose'
 import { User } from '../users/user.schema'
 import { Post } from '../posts/post.schema'
 import { LikeParentType } from '../likes/like.schema'
+import { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete'
+const MongooseDelete = require('mongoose-delete')
 
-export type CommentDocument = HydratedDocument<Comment>
+export type CommentDocument = HydratedDocument<Comment> & SoftDeleteDocument
+export type CommentModel = SoftDeleteModel<CommentDocument>
 
 @Schema({
     timestamps: true,
@@ -12,6 +15,7 @@ export type CommentDocument = HydratedDocument<Comment>
         virtuals: true,
         versionKey: false,
     },
+    toObject: { virtuals: true },
 })
 export class Comment {
     @Prop({ required: true })
@@ -23,17 +27,15 @@ export class Comment {
     @Prop({ type: Types.ObjectId, ref: 'Post', required: true })
     post: Post
 
-    @Prop({ default: null })
-    deletedAt: Date | null
-
     @Virtual()
     likeCount: number
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment)
 
+CommentSchema.plugin(MongooseDelete, { deletedAt: true, overrideMethods: true })
+
 CommentSchema.index({ createdAt: -1 })
-CommentSchema.index({ deletedAt: 1 })
 
 CommentSchema.virtual('likesCount', {
     ref: 'Like',

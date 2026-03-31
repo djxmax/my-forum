@@ -19,5 +19,4 @@ export class CommentResponseDto {
     hasLiked: boolean
     createdAt: Date
     updatedAt: Date
-    deletedAt: Date | null
 }
