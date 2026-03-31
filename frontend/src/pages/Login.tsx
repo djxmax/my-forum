@@ -7,8 +7,9 @@ import { Input } from "../core/Input";
 import { Button } from "../core/Button";
 import { Center } from "../core/Center";
 import { useLogin } from "../hooks/useAuth";
-import { Formik, Form, Field, FieldProps } from "formik";
-import { LoginSchema } from "../entities";
+import Form from "@rjsf/core";
+import { RJSFSchema, UiSchema } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -19,6 +20,32 @@ export default function Login() {
     (err: any) =>
       setError(err.response?.data?.message ?? "Invalid credentials"),
   );
+
+  const schema: RJSFSchema = {
+    title: "Bienvenue",
+    type: "object",
+    required: ["email", "password"],
+    properties: {
+      email: { type: "string", title: "Email", default: "" },
+      password: {
+        type: "string",
+        title: "Password",
+        default: "",
+        minLength: 3,
+      },
+    },
+  };
+
+  const uischema: UiSchema = {
+    email: {
+      "ui:autofocus": true,
+      "ui:placeholder": "test@example.com",
+    },
+    password: {
+      "ui:widget": "password",
+      "ui:placeholder": "**********",
+    },
+  };
 
   return (
     <Center>
@@ -33,6 +60,17 @@ export default function Login() {
               </div>
             )}
 
+            <Form
+              schema={schema}
+              uiSchema={uischema}
+              validator={validator}
+              onSubmit={(e) => {
+                console.log("submit", e.formData);
+                mutation.mutate(e.formData);
+              }}
+            />
+
+            {/*
             <Formik
               initialValues={{ email: "", password: "" }}
               validationSchema={LoginSchema}
@@ -71,7 +109,7 @@ export default function Login() {
                   </Button>
                 </Stack>
               </Form>
-            </Formik>
+            </Formik>*/}
 
             <Text variant="paragraph">
               <Link to="/register" className="text-primary-600 hover:underline">
