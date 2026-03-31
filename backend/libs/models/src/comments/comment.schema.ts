@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose'
 import mongoose, { Document, HydratedDocument, Types } from 'mongoose'
 import { User } from '../users/user.schema'
 import { Post } from '../posts/post.schema'
@@ -25,6 +25,9 @@ export class Comment {
 
     @Prop({ default: null })
     deletedAt: Date | null
+
+    @Virtual()
+    likeCount: number
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment)
