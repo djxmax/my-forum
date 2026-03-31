@@ -30,7 +30,7 @@ describe('PostService', () => {
     }
 
     const mockCommentModel = {
-        findWithDeleted: jest.fn().mockReturnValue({ select: jest.fn().mockResolvedValue([]) }),
+        find: jest.fn().mockReturnValue({ select: jest.fn().mockResolvedValue([]) }),
         delete: jest.fn().mockResolvedValue({}),
     }
 
@@ -119,7 +119,7 @@ describe('PostService', () => {
     describe('delete', () => {
         it('should soft delete post and its comments', async () => {
             mockPostModel.findById.mockResolvedValue(mockPost)
-            mockCommentModel.findWithDeleted.mockReturnValue({ select: jest.fn().mockResolvedValue([]) })
+            mockCommentModel.find.mockReturnValue({ select: jest.fn().mockResolvedValue([]) })
 
             const result = await service.delete('post-id', mockUser)
 
