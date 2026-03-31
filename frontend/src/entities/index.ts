@@ -1,9 +1,22 @@
+import * as Yup from "yup";
+
+/**
+ * User login & register
+ */
 export interface User {
   id: string;
   username: string;
   email: string;
 }
 
+export const LoginSchema = Yup.object().shape({
+  email: Yup.string().email("Email non valide").required("Email requis"),
+  password: Yup.string().min(1).required("Mot de passe requis"),
+});
+
+/**
+ * Create post
+ */
 export interface Post {
   id: string;
   title: string;
@@ -17,6 +30,9 @@ export interface Post {
   createdAt: string;
 }
 
+/**
+ * Create comment
+ */
 export interface Comment {
   id: string;
   text: string;
@@ -30,11 +46,17 @@ export interface Comment {
   createdAt: string;
 }
 
+/**
+ * Auth
+ */
 export interface AuthResponse {
   access_token: string;
   user: User;
 }
 
+/**
+ * Analytics
+ */
 export interface AnalyticsData {
   totalPosts: number;
   totalLikes: number;
@@ -44,6 +66,9 @@ export interface AnalyticsData {
   recentLimitDays: number;
 }
 
+/**
+ * Pagination
+ */
 export interface PaginatedResponse<T> {
   data: T[];
   limit: number;

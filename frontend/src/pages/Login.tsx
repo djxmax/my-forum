@@ -7,22 +7,18 @@ import { Input } from "../core/Input";
 import { Button } from "../core/Button";
 import { Center } from "../core/Center";
 import { useLogin } from "../hooks/useAuth";
+import { Formik, Form, Field, FieldProps } from "formik";
+import { LoginSchema } from "../entities";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
   const mutation = useLogin(
     () => navigate("/"),
-    (err: any) => setError(err.response?.data?.message ?? "Invalid credentials"),
+    (err: any) =>
+      setError(err.response?.data?.message ?? "Invalid credentials"),
   );
-
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    mutation.mutate(form);
-  };
 
   return (
     <Center>
@@ -37,34 +33,45 @@ export default function Login() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit}>
-              <Stack spacing={4}>
-                <Input
-                  id="email"
-                  label="Email"
-                  type="email"
-                  required
-                  placeholder="test@exemple.com"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                />
-                <Input
-                  id="password"
-                  label="Mot de passe"
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
-                  errorLabel={error}
-                />
-                <Button type="submit" disabled={mutation.isPending} size="lg">
-                  {mutation.isPending ? "Connexion..." : "Se connecter"}
-                </Button>
-              </Stack>
-            </form>
+            <Formik
+              initialValues={{ email: "", password: "" }}
+              validationSchema={LoginSchema}
+              onSubmit={(values) => {
+                mutation.mutate(values);
+              }}
+            >
+              <Form>
+                <Stack spacing={4}>
+                  <Field name="email">
+                    {({ field, meta }: FieldProps) => (
+                      <Input
+                        {...field}
+                        type="email"
+                        label="Email"
+                        errorLabel={
+                          meta.touched && meta.error ? meta.error : undefined
+                        }
+                      />
+                    )}
+                  </Field>
+                  <Field name="password">
+                    {({ field, meta }: FieldProps) => (
+                      <Input
+                        {...field}
+                        type="password"
+                        label="Mot de passe"
+                        errorLabel={
+                          meta.touched && meta.error ? meta.error : undefined
+                        }
+                      />
+                    )}
+                  </Field>
+                  <Button type="submit" disabled={mutation.isPending} size="lg">
+                    {mutation.isPending ? "Connexion..." : "Se connecter"}
+                  </Button>
+                </Stack>
+              </Form>
+            </Formik>
 
             <Text variant="paragraph">
               <Link to="/register" className="text-primary-600 hover:underline">
