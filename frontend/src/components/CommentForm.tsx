@@ -1,29 +1,47 @@
 import { Card } from "../core/Card";
 import { Stack } from "../core/Stack";
 import { Button } from "../core/Button";
+import { Formik, Form, Field, FieldProps } from "formik";
+import { CreateCommentSchema } from "../entities";
+import { Textarea } from "../core/Textarea";
 
 type Props = {
-  value: string;
-  onChange: (value: string) => void;
-  onSubmit: () => void;
+  onSubmit: (value: string, resetForm: () => void) => void;
   isPending: boolean;
 };
 
-export function CommentForm({ value, onChange, onSubmit, isPending }: Props) {
+export function CommentForm({ onSubmit, isPending }: Props) {
   return (
     <Card>
-      <Stack spacing={3}>
-        <textarea
-          rows={3}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Écrire un commentaire..."
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder:text-gray-400"
-        />
-        <Button onClick={onSubmit} disabled={isPending || !value} size="sm">
-          {isPending ? "Envoi..." : "Commenter"}
-        </Button>
-      </Stack>
+      <Formik
+        initialValues={{
+          text: "",
+        }}
+        validationSchema={CreateCommentSchema}
+        onSubmit={(values, { resetForm }) => {
+          onSubmit(values.text, resetForm);
+        }}
+      >
+        <Form>
+          <Stack spacing={3}>
+            <Field name="text">
+              {({ field, meta }: FieldProps) => (
+                <Textarea
+                  {...field}
+                  label="Contenu"
+                  placeholder="Contenu du commentaire"
+                  errorLabel={
+                    meta.touched && meta.error ? meta.error : undefined
+                  }
+                />
+              )}
+            </Field>
+            <Button type="submit" disabled={isPending} size="lg">
+              {isPending ? "Publication..." : "Publier"}
+            </Button>
+          </Stack>
+        </Form>
+      </Formik>
     </Card>
   );
 }

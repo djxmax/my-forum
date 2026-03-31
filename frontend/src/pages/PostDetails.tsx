@@ -20,7 +20,6 @@ export default function PostDetail() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const [comment, setComment] = useState("");
   const [page, setPage] = useState(0);
 
   const { data: post, isLoading: postLoading } = usePost(id);
@@ -30,7 +29,6 @@ export default function PostDetail() {
     5,
   );
   const createComment = useCreateComment(id, () => {
-    setComment("");
     setPage((comments?.totalPages ?? 1) - 1);
   });
   const deleteComment = useDeleteComment(id);
@@ -84,9 +82,9 @@ export default function PostDetail() {
         {/* Formulaire de commentaire */}
         {isAuthenticated && (
           <CommentForm
-            value={comment}
-            onChange={setComment}
-            onSubmit={() => createComment.mutate(comment)}
+            onSubmit={(value, resetForm) =>
+              createComment.mutate(value, { onSuccess: resetForm })
+            }
             isPending={createComment.isPending}
           />
         )}

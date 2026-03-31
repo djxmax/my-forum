@@ -46,7 +46,7 @@ export const PasswordChangeSchema = Yup.object().shape({
       [Yup.ref("currentPassword")],
       "Le nouveau mot de passe doit être différent de l'actuel",
     )
-    .required(),
+    .required("Le mot de passe est requis"),
   confirmNewPassword: Yup.string()
     .oneOf([Yup.ref("newPassword")], "Les mots de passe ne correspondent pas")
     .required("Confirmation requise"),
@@ -67,6 +67,18 @@ export interface Post {
   hasLiked: boolean;
   createdAt: string;
 }
+export const CreatePostSchema = Yup.object().shape({
+  title: Yup.string()
+    .trim()
+    .min(5, "Le titre doit faire au minimum 5 caractères")
+    .max(150, "Le titre doit faire 150 caractère maximum")
+    .required("Le titre est requis"),
+  text: Yup.string()
+    .trim()
+    .min(8, "Le contenu doit fait au minimum 8 caractères")
+    .max(1500, "Le contenu doit faire maximum 1500")
+    .required("Le contenu est requis"),
+});
 
 /**
  * Create comment
@@ -83,6 +95,13 @@ export interface Comment {
   hasLiked: boolean;
   createdAt: string;
 }
+export const CreateCommentSchema = Yup.object().shape({
+  text: Yup.string()
+    .trim()
+    .min(8, "Le commentaire doit fait au minimum 8 caractères")
+    .max(1500, "Le commentaire doit faire maximum 1500")
+    .required("Le commentaire est requis"),
+});
 
 /**
  * Auth
