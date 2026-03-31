@@ -29,7 +29,9 @@ export default function PostDetail() {
     5,
   );
   const createComment = useCreateComment(id, () => {
-    setPage((comments?.totalPages ?? 1) - 1);
+    let page = (comments?.totalPages ?? 1) - 1;
+    if (page < 0) page = 0;
+    setPage(page);
   });
   const deleteComment = useDeleteComment(id);
   const deletePost = useDeletePost(id, () => navigate("/"));
