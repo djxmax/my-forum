@@ -14,7 +14,8 @@ export default function CreatePost() {
 
   const mutation = useCreatePost(
     () => navigate("/"),
-    (err: any) => setError(err.response?.data?.message ?? "Une erreur est survenue"),
+    (err: any) =>
+      setError(err.response?.data?.message ?? "Une erreur est survenue"),
   );
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
@@ -50,18 +51,16 @@ export default function CreatePost() {
                 placeholder="Titre du post"
               />
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">
                   Contenu
                 </label>
                 <textarea
                   rows={6}
                   required
                   value={form.text}
-                  onChange={(e) =>
-                    setForm({ ...form, text: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, text: e.target.value })}
                   placeholder="Contenu du post..."
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder:text-gray-400"
                 />
               </div>
               <div className="flex gap-3">
