@@ -24,11 +24,11 @@ export class Comment {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, required: true })
     author: User
 
-    @Prop({ type: Types.ObjectId, ref: 'Post', required: true })
+    @Prop({ type: Types.ObjectId, ref: Post.name, required: true })
     post: Post
 
     @Virtual()
-    likeCount: number
+    likesCount: number
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment)

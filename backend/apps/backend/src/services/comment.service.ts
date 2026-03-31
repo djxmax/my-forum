@@ -24,6 +24,7 @@ export class CommentService {
         const comments = await this.commentModel
             .find({ post: postId })
             .populate('author', 'username email')
+            .populate('likesCount')
             .sort({ createdAt: 1 })
             .skip(skip)
             .limit(limit)
